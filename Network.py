@@ -6,7 +6,7 @@ class PruningNetwork(nn.Module):
         super(PruningNetwork, self).__init__()
         self._conv = nn.ModuleList()
         for dim_index in range(len(dim_list) - 1):
-            self._conv.append(PruningConvolution(dim_list[dim_index], dim_list[dim_index + 1]))
+            self._conv.append(PruningDepthConv(dim_list[dim_index], dim_list[dim_index + 1]))
         self.max = nn.AdaptiveMaxPool2d(1)
 
     def forward(self, x):
