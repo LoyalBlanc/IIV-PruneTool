@@ -46,14 +46,18 @@ class Abstract(nn.Module):
 
 
 def prune_test(conv):
-    data = torch.randn(6, conv.get_pruned_channel()[0], 6, 6)
     conv.calculate_channel_contribution()
     print("Prune Score: {:.4f}(without soft max)".format(conv.get_prune_score_index()))
+    data = torch.randn(6, conv.get_pruned_channel()[0], 6, 6)
     print("Origin Shape:  {} -> {}".format(data.shape, conv(data)[0].shape))
+
+    conv.prune_opc()
     print("1st Prune Opc: {} -> {}".format(data.shape, conv(data)[0].shape))
+    conv.prune_opc()
     print("2nd Prune Opc: {} -> {}".format(data.shape, conv(data)[0].shape))
-    conv.prune_opc(2)
+    conv.prune_opc(1)
     print("3rd Prune Opc: {} -> {}".format(data.shape, conv(data)[0].shape))
+
     conv.prune_ipc(1)
     data = torch.randn(6, conv.get_pruned_channel()[0], 6, 6)
     print("1st Prune Ipc: {} -> {}".format(data.shape, conv(data)[0].shape))
