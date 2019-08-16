@@ -1,6 +1,5 @@
 """
     Depthwise Separable Convolution with META learning
-    Not finished
 """
 import torch
 import torch.nn as nn
