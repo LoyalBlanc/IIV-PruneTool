@@ -18,8 +18,8 @@ class Basic(Abstract):
         return [feature, *x[1:]]
 
     def calculate_channel_contribution(self):
-        self._prune_score = torch.Tensor([torch.norm(weight, p=2) for weight in self.conv.weight])
-        _, self._prune_index = torch.min(nn.Softmax(dim=0)(self._prune_score), dim=0)
+        prune_score = torch.Tensor([torch.norm(weight, p=2) for weight in self.conv.weight])
+        _, self._prune_index = torch.min(nn.Softmax(dim=0)(prune_score), dim=0)
 
     def prune_ipc(self, prune_ipc_index):
         super().prune_ipc(prune_ipc_index)

@@ -12,7 +12,6 @@ class Abstract(nn.Module):
         self._opc = opc
         self._stride = stride
 
-        self._prune_score = None
         self._prune_index = None
 
     @abstractmethod
@@ -23,8 +22,8 @@ class Abstract(nn.Module):
     def calculate_channel_contribution(self):
         pass
 
-    def get_prune_score_index(self):
-        return self._prune_score[self._prune_index].item()
+    # def get_prune_score_index(self):
+    #     return self._prune_score[self._prune_index].item()
 
     @abstractmethod
     def prune_ipc(self, prune_ipc_index):

@@ -23,8 +23,8 @@ class DepthwiseSeparable(Abstract):
     def calculate_channel_contribution(self):
         # Calculate contribution based on every opc parameters
         # Only conv_1 will be considered
-        self._prune_score = torch.Tensor([torch.norm(weight, p=2) for weight in self._conv_1.weight])
-        _, self._prune_index = torch.min(nn.Softmax(dim=0)(self._prune_score), dim=0)
+        prune_score = torch.Tensor([torch.norm(weight, p=2) for weight in self._conv_1.weight])
+        _, self._prune_index = torch.min(nn.Softmax(dim=0)(prune_score), dim=0)
 
     def prune_ipc(self, prune_ipc_index):
         super().prune_ipc(prune_ipc_index)
