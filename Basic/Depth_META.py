@@ -57,7 +57,7 @@ class DepthwiseSeparableMETA(DepthwiseSeparable):
 
 
 if __name__ == "__main__":
-    from Abstract import prune_test
+    from Basic.Abstract import prune_test
 
     depth_meta = DepthwiseSeparable(4, 5, 2)
     prune_test(depth_meta)
