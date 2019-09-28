@@ -4,12 +4,12 @@ from torch.optim import Adam
 from GateDecorator.Dataset import get_train_loader, get_valid_loader
 
 
-def train_model(model, file_name, epochs=10, batch_size=100):
+def train_model(model, file_name, epochs=10, batch_size=100, lr=1e-3):
     model.cuda()
     model.train()
 
     train_loader = get_train_loader(batch_size)
-    optimizer = Adam(model.parameters(), lr=1e-3)
+    optimizer = Adam(model.parameters(), lr=lr)
     loss_fuc = nn.CrossEntropyLoss()
 
     total_step = len(train_loader)
