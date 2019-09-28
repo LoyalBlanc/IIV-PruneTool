@@ -24,13 +24,17 @@ class GbnModule(nn.Module):
     def calculate_score(self, grad):
         self.score += (grad * self.fai).abs()
 
-    def freeze(self):
+    def to_gbn(self):
         with torch.no_grad():
             self.fai.set_(self.bn.weight.view(1, -1, 1, 1))
             self.fai.requires_grad = True
             self.bn.bias.set_(torch.clamp(self.bn.bias / self.bn.weight, -10, 10))
             self.bn.weight.set_(torch.ones_like(self.bn.weight))
             self.bn.weight.requires_grad = False
+
+    def freeze(self):
+        self.conv.weight.requires_grad = False
+        self.bn.bias.requires_grad = False
         self.hook = self.fai.register_hook(self.calculate_score)
 
     def prune_ipc(self, prune_ipc_index):
@@ -55,32 +59,15 @@ class GbnModule(nn.Module):
         self.fai = nn.Parameter(torch.cat((self.fai[0:1, 0:prune_opc_index],
                                            self.fai[0:1, prune_opc_index + 1:]), dim=1))
 
-        return prune_opc_index
-
     def melt(self):
+        self.conv.weight.requires_grad = True
+        self.bn.bias.requires_grad = True
+        self.hook.remove()
+        self.hook = None
+
+    def to_bn(self):
         with torch.no_grad():
             self.bn.bias.set_(self.bn.bias * self.fai.view(-1))
             self.bn.weight.set_(self.fai.view(-1))
             self.bn.weight.requires_grad = True
             self.fai = nn.Parameter(torch.ones(1, self.opc, 1, 1), requires_grad=False)
-        self.hook.remove()
-        self.hook = None
-
-
-if __name__ == "__main__":
-    test_conv = GbnModule(3, 4, 2)
-    print(test_conv(torch.rand([2, 3, 16, 32])).shape)
-
-    test_conv.freeze()
-    test_output = test_conv(torch.rand([2, 3, 16, 32]))
-    print(test_output.shape)
-    test_output.sum().backward()
-
-    test_conv.prune_ipc(0)
-    print(test_conv(torch.rand([2, 2, 16, 32])).shape)
-
-    print(test_conv.get_min_score(), test_conv.prune_opc())
-    print(test_conv(torch.rand([2, 2, 16, 32])).shape)
-
-    test_conv.melt()
-    print(test_conv(torch.rand([2, 2, 16, 32])).shape)

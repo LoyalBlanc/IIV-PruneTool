@@ -16,6 +16,10 @@ class GatedNet(nn.Module):
             x = conv(x)
         return self.linear(x.reshape(x.size(0), -1))
 
+    def to_gbn(self):
+        for conv in self.conv_trunk:
+            conv.to_gbn()
+
     def freeze(self):
         for conv in self.conv_trunk:
             conv.freeze()
@@ -37,22 +41,28 @@ class GatedNet(nn.Module):
         for conv in self.conv_trunk:
             conv.melt()
 
+    def to_bn(self):
+        for conv in self.conv_trunk:
+            conv.to_bn()
+
 
 if __name__ == "__main__":
     from GateDecorator.Train import train_model, valid_model
 
     gated_net = GatedNet(1)
-
-    test_batch_size = 12000
+    test_batch_size = 10000
 
     train_model(gated_net, batch_size=test_batch_size, epochs=10, lr=1e-4)
     valid_model(gated_net)
 
-    gated_net.freeze()
-    for _ in range(19):
-        train_model(gated_net, batch_size=test_batch_size, epochs=1, lr=1e-6)
-        gated_net.prune(64)
+    gated_net.to_gbn()
+    for _ in range(5):
+        gated_net.freeze()
+        train_model(gated_net, batch_size=test_batch_size, epochs=1, lr=1e-5)
+        gated_net.prune()
         valid_model(gated_net)
-
-    gated_net.melt()
+        gated_net.melt()
+        train_model(gated_net, batch_size=test_batch_size, epochs=1, lr=1e-6)
+        valid_model(gated_net)
+    gated_net.to_bn()
     valid_model(gated_net)
