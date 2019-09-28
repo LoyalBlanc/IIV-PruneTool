@@ -1,3 +1,9 @@
+"""
+conda activate test_env
+cd Python/TestNetwork
+ls
+python demo.py
+"""
 from GateDecorator.Train import train_model, valid_model
 from GateDecorator.GatedNet import GatedNet
 
