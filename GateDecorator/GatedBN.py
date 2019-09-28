@@ -32,10 +32,10 @@ class GatedBN(nn.Module):
 
     def start_calculating(self):
         self.score.zero_()
-        pass
+        self.register_backward_hook(self.calculate_score)
 
     def end_calculating(self):
-        pass
+        self._backward_hooks.remove()
 
 
 if __name__ == "__main__":

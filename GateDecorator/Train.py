@@ -14,16 +14,14 @@ def train_model(model, file_name, epochs=10, batch_size=100):
 
     total_step = len(train_loader)
     for epoch in range(epochs):
-        sum_loss = 0
         for index, (images, labels) in enumerate(train_loader):
             outputs = model(images.cuda())
             loss = loss_fuc(outputs, labels.cuda())
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            sum_loss += loss.item()
-        print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
-              .format(epoch + 1, epochs + 1, index + 1, total_step, sum_loss / batch_size * 1e6))
+            print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
+                  .format(epoch + 1, epochs, index + 1, total_step, loss.item() / batch_size * 1e6))
     torch.save(model.state_dict(), file_name)
 
 
