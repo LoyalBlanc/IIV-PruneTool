@@ -37,4 +37,4 @@ def valid_model(model, batch_size=10000):
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels.cuda()).sum().item()
-    print('Accuracy of the model: {} %'.format(100 * correct / total))
+    return 100 * correct / total

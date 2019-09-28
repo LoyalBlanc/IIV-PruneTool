@@ -52,9 +52,15 @@ class GbnModule(nn.Module):
         self.conv.weight = nn.Parameter(conv_weight)
 
         bn_bias = torch.cat((self.bn.bias[0:prune_opc_index], self.bn.bias[prune_opc_index + 1:]), dim=0)
+        # bn_running_mean = torch.cat((self.bn.running_mean[0:prune_opc_index],
+        #                              self.bn.running_mean[prune_opc_index + 1:]), dim=0)
+        # bn_running_var = torch.cat((self.bn.running_var[0:prune_opc_index],
+        #                             self.bn.running_var[prune_opc_index + 1:]), dim=0)
         self.bn = nn.BatchNorm2d(self.opc)
         self.bn.weight = nn.Parameter(torch.ones(self.opc), requires_grad=False)
         self.bn.bias = nn.Parameter(bn_bias)
+        # self.bn.running_mean = nn.Parameter(bn_running_mean)
+        # self.bn.running_var = nn.Parameter(bn_running_var)
 
         self.fai = nn.Parameter(torch.cat((self.fai[0:1, 0:prune_opc_index],
                                            self.fai[0:1, prune_opc_index + 1:]), dim=1))

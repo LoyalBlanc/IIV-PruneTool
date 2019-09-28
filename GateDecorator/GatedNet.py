@@ -31,8 +31,8 @@ class GatedNet(nn.Module):
                 prune_score.append((score, i_channel, i_conv))
             conv.score = 0
         prune_score = torch.Tensor(prune_score)
-        for index in prune_score[:, 0].sort(0)[1][0:threshold]:
-            _, i_channel, i_conv = prune_score[index]
+        for prune_index in prune_score[:, 0].sort(0)[1][0:threshold]:
+            _, i_channel, i_conv = prune_score[prune_index]
             if i_conv < 8:
                 self.conv_trunk[int(i_conv)].prune_opc(int(i_channel))
                 self.conv_trunk[int(i_conv) + 1].prune_ipc(int(i_channel))
@@ -48,21 +48,24 @@ class GatedNet(nn.Module):
 
 if __name__ == "__main__":
     from GateDecorator.Train import train_model, valid_model
+    import csv
 
     gated_net = GatedNet(1)
     test_batch_size = 10000
+    with open("accuracy.csv", "w") as csv_file:
+        writer = csv.writer(csv_file)
 
-    train_model(gated_net, batch_size=test_batch_size, epochs=10, lr=1e-4)
-    valid_model(gated_net)
+        train_model(gated_net, batch_size=test_batch_size, epochs=1, lr=1e-4)
+        writer.writerow([0, valid_model(gated_net), 1])
 
-    gated_net.to_gbn()
-    for _ in range(5):
-        gated_net.freeze()
-        train_model(gated_net, batch_size=test_batch_size, epochs=1, lr=1e-5)
-        gated_net.prune()
-        valid_model(gated_net)
-        gated_net.melt()
-        train_model(gated_net, batch_size=test_batch_size, epochs=1, lr=1e-6)
-        valid_model(gated_net)
-    gated_net.to_bn()
-    valid_model(gated_net)
+        gated_net.to_gbn()
+        for index in range(1):
+            gated_net.freeze()
+            train_model(gated_net, batch_size=test_batch_size, epochs=1, lr=1e-3)
+            gated_net.prune(64)
+            writer.writerow([index + 1, valid_model(gated_net), 0])
+            gated_net.melt()
+            train_model(gated_net, batch_size=test_batch_size, epochs=1, lr=1e-5)
+            writer.writerow([index, valid_model(gated_net), 1])
+        gated_net.to_bn()
+        writer.writerow([-1, valid_model(gated_net), 1])
