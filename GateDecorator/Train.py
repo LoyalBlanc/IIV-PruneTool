@@ -4,7 +4,7 @@ from torch.optim import Adam
 from GateDecorator.Dataset import get_train_loader, get_valid_loader
 
 
-def train_model(model, epochs=10, batch_size=100, lr=1e-3):
+def train_model(model, epochs=10, batch_size=10000, lr=1e-3):
     model.cuda()
     model.train()
 
