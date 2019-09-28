@@ -42,14 +42,17 @@ if __name__ == "__main__":
     from GateDecorator.Train import train_model, valid_model
 
     gated_net = GatedNet(1)
-    train_model(gated_net, batch_size=12000, epochs=10, lr=1e-4)
-    valid_model(gated_net, batch_size=10000)
+
+    test_batch_size = 12000
+
+    train_model(gated_net, batch_size=test_batch_size, epochs=10, lr=1e-4)
+    valid_model(gated_net)
 
     gated_net.freeze()
     for _ in range(19):
-        train_model(gated_net, batch_size=12000, epochs=1, lr=1e-4)
+        train_model(gated_net, batch_size=test_batch_size, epochs=1, lr=1e-6)
         gated_net.prune(64)
-        valid_model(gated_net, batch_size=10000)
+        valid_model(gated_net)
 
     gated_net.melt()
-    valid_model(gated_net, batch_size=10000)
+    valid_model(gated_net)

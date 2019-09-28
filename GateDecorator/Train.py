@@ -12,19 +12,19 @@ def train_model(model, epochs=10, batch_size=100, lr=1e-3):
     optimizer = Adam(model.parameters(), lr=lr)
     loss_fuc = nn.CrossEntropyLoss()
 
-    total_step = len(train_loader)
     for epoch in range(epochs):
+        sum_loss = 0
         for index, (images, labels) in enumerate(train_loader):
             outputs = model(images.cuda())
             loss = loss_fuc(outputs, labels.cuda())
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
-                  .format(epoch + 1, epochs, index + 1, total_step, loss.item() / batch_size * 1e6))
+            sum_loss += loss.item()
+        print('Epoch [{}/{}],  Loss: {:.4f}'.format(epoch + 1, epochs, sum_loss))
 
 
-def valid_model(model, batch_size=100):
+def valid_model(model, batch_size=10000):
     model.cuda()
     model.eval()
 
