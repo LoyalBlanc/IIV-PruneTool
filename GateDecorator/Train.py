@@ -4,7 +4,7 @@ from torch.optim import Adam
 from GateDecorator.Dataset import get_train_loader, get_valid_loader
 
 
-def train_model(model, file_name, epochs=10, batch_size=100, lr=1e-3):
+def train_model(model, epochs=10, batch_size=100, lr=1e-3):
     model.cuda()
     model.train()
 
@@ -22,11 +22,9 @@ def train_model(model, file_name, epochs=10, batch_size=100, lr=1e-3):
             optimizer.step()
             print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                   .format(epoch + 1, epochs, index + 1, total_step, loss.item() / batch_size * 1e6))
-    torch.save(model.state_dict(), file_name)
 
 
-def valid_model(model, file_name, batch_size=100):
-    model.load_state_dict(torch.load(file_name))
+def valid_model(model, batch_size=100):
     model.cuda()
     model.eval()
 

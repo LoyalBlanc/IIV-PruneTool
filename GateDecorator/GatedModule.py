@@ -14,7 +14,6 @@ class GbnModule(nn.Module):
 
         self.fai = nn.Parameter(torch.ones(1, self.opc, 1, 1), requires_grad=False)
         self.score = 0
-        self.prune_index = None
         self.hook = None
 
     def forward(self, x):
@@ -34,10 +33,6 @@ class GbnModule(nn.Module):
             self.bn.weight.requires_grad = False
         self.hook = self.fai.register_hook(self.calculate_score)
 
-    def get_min_score(self):
-        value, self.prune_index = torch.min(self.score.squeeze(), 0)
-        return value
-
     def prune_ipc(self, prune_ipc_index):
         self.ipc -= 1
         conv_weight = torch.cat((self.conv.weight[:, 0:prune_ipc_index],
@@ -45,10 +40,7 @@ class GbnModule(nn.Module):
         self.conv = nn.Conv2d(self.ipc, self.opc, 3, stride=self.stride, padding=1, bias=False)
         self.conv.weight = nn.Parameter(conv_weight)
 
-    def prune_opc(self, prune_opc_index=None):
-        if prune_opc_index is None:
-            prune_opc_index = self.prune_index
-
+    def prune_opc(self, prune_opc_index):
         self.opc -= 1
         conv_weight = torch.cat((self.conv.weight[0:prune_opc_index],
                                  self.conv.weight[prune_opc_index + 1:]), dim=0)
