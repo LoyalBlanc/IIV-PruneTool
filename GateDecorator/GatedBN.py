@@ -7,12 +7,13 @@ class GatedBN(nn.Module):
         super().__init__()
         self.channels = channels
         self.bn = nn.BatchNorm2d(self.channels)
+        self.bn_mask = nn.Parameter(torch.ones(1, self.channels, 1, 1), requires_grad=False)
         self.fai = nn.Parameter(torch.ones(1, self.channels, 1, 1), requires_grad=False)
         self.score = 0
         self.hook = None
 
     def forward(self, x):
-        return self.fai * self.bn(x)
+        return self.bn_mask * self.fai * self.bn(x)
 
     def freeze(self):
         with torch.no_grad():
@@ -25,8 +26,8 @@ class GatedBN(nn.Module):
 
     def melt(self):
         with torch.no_grad():
-            self.bn.bias.set_(self.bn.bias * self.fai)
-            self.bn.weight.set_(self.fai)
+            self.bn.bias.set_(self.bn.bias * self.fai.view(-1))
+            self.bn.weight.set_(self.fai.view(-1))
             self.bn.weight.requires_grad = True
             self.fai = nn.Parameter(torch.ones(1, self.channels, 1, 1), requires_grad=False)
         self.hook.remove()
@@ -34,6 +35,9 @@ class GatedBN(nn.Module):
 
     def calculate_score(self, grad):
         self.score += (grad * self.fai).abs()
+
+    def prune(self):
+        self.bn_mask[self.score * self.channels < 0.5] = 0
 
 
 if __name__ == "__main__":

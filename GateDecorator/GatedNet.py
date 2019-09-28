@@ -31,25 +31,26 @@ class GatedNet(nn.Module):
         for conv in self.conv_trunk:
             conv[1].melt()
 
-    def get_score(self):
+    def prune(self):
         for conv in self.conv_trunk:
-            print(conv[1].score.squeeze())
+            print(conv[1].prune())
 
 
 if __name__ == "__main__":
     from GateDecorator.Train import train_model, valid_model
 
     gated_net = GatedNet(1)
-    # train_model(gated_net, "gated_train.pkl", batch_size=6000, epochs=10)
+    train_model(gated_net, "gated_train.pkl", batch_size=6000, epochs=3)
     valid_model(gated_net, "gated_train.pkl", batch_size=10000)
 
     gated_net.freeze()
-    train_model(gated_net, "gated_freeze.pkl", batch_size=6000, epochs=1, lr=1e-5)
-    gated_net.get_score()
+    # gated_net.load_state_dict(torch.load("gated_freeze.pkl"))
+    train_model(gated_net, "gated_freeze.pkl", batch_size=6000, epochs=1, lr=1e-4)
+    gated_net.prune()
     valid_model(gated_net, "gated_train.pkl", batch_size=10000)
 
-    gated_net.melt()
-    valid_model(gated_net, "gated_train.pkl", batch_size=10000)
-
-    train_model(gated_net, "gated_melt.pkl", batch_size=6000, epochs=1, lr=1e-5)
-    valid_model(gated_net, "gated_train.pkl", batch_size=10000)
+    # gated_net.melt()
+    # valid_model(gated_net, "gated_train.pkl", batch_size=10000)
+    #
+    # train_model(gated_net, "gated_melt.pkl", batch_size=6000, epochs=1, lr=1e-5)
+    # valid_model(gated_net, "gated_train.pkl", batch_size=10000)
