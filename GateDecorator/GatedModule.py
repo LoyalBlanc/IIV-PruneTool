@@ -72,3 +72,7 @@ class GbnModule(nn.Module):
             self.bn.weight.set_(self.fai.view(-1))
             self.bn.weight.requires_grad = True
             self.fai = nn.Parameter(torch.ones(1, self.opc, 1, 1), requires_grad=False)
+
+
+if __name__ == "__main__":
+    test_linear = nn.Linear(16, 10)

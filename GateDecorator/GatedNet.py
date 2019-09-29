@@ -9,7 +9,8 @@ class GatedNet(nn.Module):
         self.conv_trunk = nn.ModuleList([GbnModule(model_ipc, 4), GbnModule(4, 8, 2), GbnModule(8, 16),
                                          GbnModule(16, 32), GbnModule(32, 64, 2), GbnModule(64, 128),
                                          GbnModule(128, 256), GbnModule(256, 512, 2), GbnModule(512, 1024)])
-        self.linear = nn.Linear(4 * 4 * 1024, 10)
+        self.opc = 1024
+        self.linear = nn.Linear(4 * 4 * self.opc, 10)
 
     def forward(self, x):
         for conv in self.conv_trunk:
@@ -34,9 +35,18 @@ class GatedNet(nn.Module):
         prune_index_list = prune_score[:, 0].sort(0)[1][0:threshold].sort(0, descending=True)[0]
         for prune_index in prune_index_list:
             _, i_channel, i_conv = prune_score[prune_index]
-            if i_conv < 8:
-                self.conv_trunk[int(i_conv)].prune_opc(int(i_channel))
+
+            self.conv_trunk[int(i_conv)].prune_opc(int(i_channel))
+            if i_conv != 8:
                 self.conv_trunk[int(i_conv) + 1].prune_ipc(int(i_channel))
+            else:
+                self.opc -= 1
+                linear_weight = torch.cat((self.linear.weight[:, 0:16 * int(i_channel)],
+                                           self.linear.weight[:, 16 * int(i_channel) + 16:]), dim=1)
+                linear_bias = self.linear.bias
+                self.linear = nn.Linear(4 * 4 * self.opc, 10)
+                self.linear.weight = nn.Parameter(linear_weight)
+                self.linear.bias = nn.Parameter(linear_bias)
 
     def melt(self):
         for conv in self.conv_trunk:
@@ -49,8 +59,12 @@ class GatedNet(nn.Module):
 
 if __name__ == "__main__":
     from GateDecorator.Train import train_model
+    from os import environ
 
-    gated_net = GatedNet(1)
+    environ["CUDA_VISIBLE_DEVICES"] = "3"
+
+    gated_net = GatedNet(3)
+    train_model(gated_net, epochs=1, lr=1e-3)
     gated_net.to_gbn()
     gated_net.freeze()
     train_model(gated_net, epochs=1, lr=1e-3)
