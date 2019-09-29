@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     environ["CUDA_VISIBLE_DEVICES"] = "1"
     batch_size = 10000
-    gated_net = GatedNet(1)
+    gated_net = GatedNet(3)
     file_name = "accuracy_CIFAR.csv"
     print(get_parameters_number(gated_net))
 
