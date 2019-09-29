@@ -2,8 +2,6 @@
     if A+B=0: del A,B           Error: Feature changes after ReLU
     if A-B=0: double A del B
 """
-import torch
-import torch.nn as nn
 from Basic import Basic
 
 
@@ -12,7 +10,7 @@ class BasicSimilarity(Basic):
 
 
 if __name__ == "__main__":
-    from Abstract import prune_test
+    from Basic.Abstract import prune_test
 
     basic_similarity = BasicSimilarity(4, 10, 2)
     prune_test(basic_similarity)

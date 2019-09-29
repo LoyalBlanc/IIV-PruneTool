@@ -3,7 +3,7 @@
 """
 import torch
 import torch.nn as nn
-from Abstract import Abstract
+from Basic.Abstract import Abstract
 
 
 class Basic(Abstract):
@@ -49,7 +49,7 @@ class Basic(Abstract):
 
 
 if __name__ == "__main__":
-    from Abstract import prune_test
+    from Basic.Abstract import prune_test
 
     basic = Basic(4, 5, 2)
     prune_test(basic)
