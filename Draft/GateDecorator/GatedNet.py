@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from GateDecorator.GatedModule import GbnModule
+from Draft.GateDecorator.GatedModule import GbnModule
 
 
 class GatedNet(nn.Module):
@@ -58,7 +58,7 @@ class GatedNet(nn.Module):
 
 
 if __name__ == "__main__":
-    from GateDecorator.Train import train_model
+    from Draft.GateDecorator.Train import train_model
     from os import environ
 
     environ["CUDA_VISIBLE_DEVICES"] = "3"

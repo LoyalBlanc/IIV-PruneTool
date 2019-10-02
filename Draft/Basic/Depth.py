@@ -3,7 +3,7 @@
 """
 import torch
 import torch.nn as nn
-from Basic.Abstract import Abstract
+from Draft.Basic.Abstract import Abstract
 
 
 class DepthwiseSeparable(Abstract):
@@ -68,7 +68,7 @@ class DepthwiseSeparable(Abstract):
 
 
 if __name__ == "__main__":
-    from Basic.Abstract import prune_test
+    from Draft.Basic.Abstract import prune_test
 
     depth = DepthwiseSeparable(4, 5, 2)
     prune_test(depth)

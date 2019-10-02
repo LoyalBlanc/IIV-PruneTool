@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.optim import Adam
-from GateDecorator.Dataset import get_train_loader, get_valid_loader
+from Draft.GateDecorator.Dataset import get_train_loader, get_valid_loader
 
 
 def train_model(model, epochs=10, batch_size=10000, lr=1e-3):
