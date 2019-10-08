@@ -30,4 +30,4 @@ if __name__ == "__main__":
     from Network.AbstractNetwork import network_test
     from Module.MinimumWeight.MinimumWeight import Basic
 
-    network_test(ConvNet, Basic, ipc=1, opc=16, stride=4, channels=40, depth=5)
+    network_test(ConvNet, Basic, ipc=1, opc=16, stride=4, channels=24, depth=5)

@@ -17,10 +17,19 @@ class AbstractModule(nn.Module):
         self.relu = nn.ReLU(inplace=True)
 
         self.score = torch.zeros(self.opc)
+        self.hook = None
         self.regularization = 0
 
     @abstractmethod
     def forward(self, *x):
+        pass
+
+    @abstractmethod
+    def before_pruning(self):
+        pass
+
+    @abstractmethod
+    def after_pruning(self):
         pass
 
     @abstractmethod
@@ -55,12 +64,14 @@ class AbstractModule(nn.Module):
 
 def module_test(module, batch_size=1, ipc=2, opc=3, data_size=4, stride=1):
     test_conv = module(ipc=ipc, opc=opc, stride=stride)
+
+    test_conv.before_pruning()
     test_data = torch.randn(batch_size, ipc, data_size, data_size)
     test_output = test_conv(test_data)
     assert test_output.shape == torch.Size([batch_size, opc, data_size // stride, data_size // stride])
     test_conv.calculate_channel_contribution()
     test_score = test_conv.get_channel_contribution()
-    print("Origin score:", test_score)
+    print("Origin:\nscore:{}\nregularization:{}\n".format(test_score.data, test_conv.regularization.item()))
     assert test_score.shape == torch.Size([opc])
 
     test_conv.prune_ipc(ipc // 2)
@@ -69,7 +80,7 @@ def module_test(module, batch_size=1, ipc=2, opc=3, data_size=4, stride=1):
     assert test_output.shape == torch.Size([batch_size, opc, data_size // stride, data_size // stride])
     test_conv.calculate_channel_contribution()
     test_score = test_conv.get_channel_contribution()
-    print("Prune ipc score:", test_score)
+    print("Prune ipc:\nscore:{}\nregularization:{}\n".format(test_score.data, test_conv.regularization.item()))
     assert test_score.shape == torch.Size([opc])
 
     test_conv.prune_opc(opc // 2)
@@ -77,5 +88,6 @@ def module_test(module, batch_size=1, ipc=2, opc=3, data_size=4, stride=1):
     assert test_output.shape == torch.Size([batch_size, opc - 1, data_size // stride, data_size // stride])
     test_conv.calculate_channel_contribution()
     test_score = test_conv.get_channel_contribution()
-    print("Prune opc score:", test_score)
+    print("Prune opc:\nscore:{}\nregularization:{}\n".format(test_score.data, test_conv.regularization.item()))
     assert test_score.shape == torch.Size([opc - 1])
+    test_conv.after_pruning()
