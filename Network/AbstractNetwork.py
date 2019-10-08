@@ -31,6 +31,9 @@ class AbstractNetwork(nn.Module):
     def prune_index(self, conv_index, channel_index):
         pass
 
+    def get_pruned_channel(self):
+        return torch.IntTensor([conv.opc for conv in self.conv_trunk])
+
 
 def network_test(network, module, batch_size=1, ipc=2, opc=3, data_size=32, stride=1, channels=255, depth=9):
     test_network = network(module=module)

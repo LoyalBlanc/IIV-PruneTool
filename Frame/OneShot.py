@@ -24,5 +24,7 @@ if __name__ == "__main__":
     torch.manual_seed(229)
     test_prune = OneShot(0.2)
     test_network = ConvNet(Basic)
+    print(test_network.get_pruned_channel())
 
     test_prune.prune(test_network)
+    print(test_network.get_pruned_channel())
