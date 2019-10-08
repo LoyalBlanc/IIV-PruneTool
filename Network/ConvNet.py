@@ -14,11 +14,11 @@ class ConvNet(AbstractNetwork):
 
     def calculate_network_contribution(self):
         self.contribution = torch.Tensor()
-        self.contribution_index = torch.Tensor()
-        for conv_index, conv in enumerate(self.conv_trunk):
+        self.contribution_index = torch.IntTensor()
+        for conv_index, conv in enumerate(self.conv_trunk[:-1]):
             conv.calculate_channel_contribution()
             self.contribution = torch.cat((self.contribution, conv.get_channel_contribution()), dim=0)
-            temp_index = torch.Tensor([(conv_index, channel_index) for channel_index in range(conv.opc)])
+            temp_index = torch.IntTensor([(conv_index, channel_index) for channel_index in range(conv.opc)])
             self.contribution_index = torch.cat((self.contribution_index, temp_index), dim=0)
 
     def prune_index(self, conv_index, channel_index):

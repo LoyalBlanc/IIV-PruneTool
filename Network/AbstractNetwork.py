@@ -11,7 +11,7 @@ class AbstractNetwork(nn.Module):
         self.conv_trunk = nn.ModuleList()
 
         self.contribution = torch.Tensor()
-        self.contribution_index = torch.Tensor()
+        self.contribution_index = torch.IntTensor()
         self.regularization = 0
 
     @abstractmethod
