@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
-from Module.AbstractModule import Abstract
+from Module.AbstractModule import AbstractModule
 
 
-class Basic(Abstract):
+class Basic(AbstractModule):
     def __init__(self, ipc, opc, stride=1):
         super().__init__(ipc, opc, stride)
 
