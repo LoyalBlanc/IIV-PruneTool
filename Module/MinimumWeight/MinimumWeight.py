@@ -13,6 +13,10 @@ class MinimumWeight(AbstractModule):
 
         self.hook = self.register_forward_hook(calculate_regularization)
 
+    def after_pruning_module(self):
+        self.hook.remove()
+        self.regularization = 0
+
     def calculate_channel_contribution(self):
         self.score = nn.Softmax(dim=0)(torch.Tensor([torch.norm(weight, p=2) for weight in self.conv.weight]))
 

@@ -28,9 +28,9 @@ class AbstractModule(nn.Module):
     def before_pruning_module(self):
         pass
 
+    @abstractmethod
     def after_pruning_module(self):
-        self.hook.remove()
-        self.regularization = 0
+        pass
 
     @abstractmethod
     def calculate_channel_contribution(self):
