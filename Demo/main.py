@@ -1,5 +1,4 @@
 import os
-import torch
 from Demo.Model import BasicConv, DemoNetworkForTraining, DemoNetworkForPruning
 from Demo.Function import train_model, valid_model
 from Module.MinimumWeight.MinimumWeight import MinimumWeight
@@ -22,9 +21,9 @@ def prune(model, ratio):
 if __name__ == "__main__":
     # Origin model
     training_network = DemoNetworkForTraining(BasicConv)
-    valid_model(training_network)  # 10.32
+    valid_model(training_network)  # 10.28
     train_model(training_network, epochs=10)
-    valid_model(training_network)  # 97.99
+    valid_model(training_network)  # 98.31
 
     # One shot pruning
     pruning_network = DemoNetworkForPruning(MinimumWeight)
@@ -34,7 +33,7 @@ if __name__ == "__main__":
     prune(pruning_network, 0.41)
     pruning_network.after_pruning_network()
     train_model(pruning_network, epochs=15, regular=False)
-    valid_model(pruning_network)  # 99.13 / 37, 37, 38, 32, 45
+    valid_model(pruning_network)  # 99.06 / 34, 30, 41, 37, 47
 
     # Iterative pruning
     pruning_network = DemoNetworkForPruning(MinimumWeight)
@@ -46,4 +45,4 @@ if __name__ == "__main__":
         train_model(pruning_network, epochs=2, regular=True)
     pruning_network.after_pruning_network()
     train_model(pruning_network, epochs=5, regular=False)
-    valid_model(pruning_network)  # 98.91 / 27, 32, 45, 40, 46
+    valid_model(pruning_network)  # 98.40 / 29, 31, 47, 46, 37
