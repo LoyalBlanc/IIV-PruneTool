@@ -3,14 +3,37 @@ import torch.nn as nn
 from Network.AbstractNetwork import AbstractNetwork
 
 
-class ConvNet(AbstractNetwork):
+class BasicConv(nn.Module):
+    def __init__(self, ipc, opc, stride=1):
+        nn.Module.__init__(self)
+        self.conv = nn.Conv2d(ipc, opc, 3, stride=stride, padding=1, bias=False)
+        self.bn = nn.BatchNorm2d(opc)
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        return self.relu(self.bn(self.conv(x)))
+
+
+class DemoNetworkForTraining(nn.Module):
     def __init__(self, module, data_size=32):
         super().__init__()
-        self.conv_trunk.extend([module(1, 4), module(4, 4, 2), module(4, 8), module(8, 8, 2), module(8, 16)])
+        self.conv_trunk = nn.ModuleList([module(1, 64), module(64, 64, 2), module(64, 64),
+                                         module(64, 64, 2), module(64, 64)])
+        self.fc = nn.Linear(4 * data_size ** 2, 10)
 
-        self.data_size = data_size
-        self.fc_ipc_channel = 16
-        self.fc_ipc_size = self.data_size ** 2 // 16
+    def forward(self, x):
+        for conv in self.conv_trunk:
+            x = conv(x)
+        return self.fc(x.reshape(x.size(0), -1))
+
+
+class DemoNetworkForPruning(AbstractNetwork):
+    def __init__(self, module, data_size=32):
+        super().__init__()
+        self.conv_trunk.extend([module(1, 64), module(64, 64, 2), module(64, 64), module(64, 64, 2), module(64, 64)])
+
+        self.fc_ipc_channel = 64
+        self.fc_ipc_size = data_size ** 2 // 16
         self.fc = nn.Linear(self.fc_ipc_channel * self.fc_ipc_size, 10)
 
     def forward(self, x):
@@ -45,4 +68,4 @@ if __name__ == "__main__":
     from Network.AbstractNetwork import network_test
     from Module.MinimumWeight.MinimumWeight import Basic
 
-    network_test(ConvNet, Basic, ipc=1, channels=40, depth=5, data_size=32)
+    network_test(DemoNetworkForPruning, Basic, ipc=1, channels=64 * 5, depth=5, data_size=32)
