@@ -16,7 +16,6 @@ class OneShot(AbstractFrame):
         _, prune_index_sorted = prune_index[:, 1].sort(dim=0, descending=True)
         for index in prune_index_sorted:
             conv_index, channel_index = prune_index[index]
-            print(conv_index, channel_index)
             network.prune_index(conv_index, channel_index)
         network.after_pruning_network()
 
