@@ -8,10 +8,6 @@ class ConvNet(AbstractNetwork):
         super().__init__()
         self.conv_trunk.extend([module(1, 4), module(4, 4, 2), module(4, 8), module(8, 8, 2), module(8, 16)])
 
-    def forward(self, x):
-        x = super().forward(x)
-        return x
-
     def calculate_network_contribution(self):
         self.contribution = torch.Tensor()
         self.contribution_index = torch.IntTensor()

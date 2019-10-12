@@ -20,17 +20,17 @@ class AbstractModule(nn.Module):
         self.hook = None
         self.regularization = 0
 
-    @abstractmethod
     def forward(self, x):
-        pass
+        feature = self.relu(self.bn(self.conv(x)))
+        return feature
 
     @abstractmethod
-    def before_pruning(self):
+    def before_pruning_module(self):
         pass
 
-    @abstractmethod
-    def after_pruning(self):
-        pass
+    def after_pruning_module(self):
+        self.hook.remove()
+        self.regularization = 0
 
     @abstractmethod
     def calculate_channel_contribution(self):
@@ -59,13 +59,12 @@ class AbstractModule(nn.Module):
         self.bn.bias = nn.Parameter(bn_bias)
 
         self.calculate_channel_contribution()
-        return prune_opc_index
 
 
 def module_test(module, batch_size=1, ipc=2, opc=3, data_size=4, stride=1):
     test_conv = module(ipc=ipc, opc=opc, stride=stride)
+    test_conv.before_pruning_module()
 
-    test_conv.before_pruning()
     test_data = torch.randn(batch_size, ipc, data_size, data_size)
     test_output = test_conv(test_data)
     assert test_output.shape == torch.Size([batch_size, opc, data_size // stride, data_size // stride])
@@ -90,4 +89,5 @@ def module_test(module, batch_size=1, ipc=2, opc=3, data_size=4, stride=1):
     test_score = test_conv.get_channel_contribution()
     print("Prune opc:\nscore:{}\nregularization:{}\n".format(test_score.data, test_conv.regularization.item()))
     assert test_score.shape == torch.Size([opc - 1])
-    test_conv.after_pruning()
+
+    test_conv.after_pruning_module()
