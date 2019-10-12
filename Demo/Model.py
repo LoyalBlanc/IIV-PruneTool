@@ -38,9 +38,9 @@ class DemoNetworkForPruning(AbstractNetwork):
         self.fc = nn.Linear(self.fc_ipc_channel * self.fc_ipc_size, 10)
 
     def forward(self, x):
-        x = super().forward(x)
-        x = self.fc(x.reshape(x.size(0), -1))
-        return x
+        for conv in self.conv_trunk:
+            x = conv(x)
+        return self.fc(x.reshape(x.size(0), -1))
 
     def calculate_network_contribution(self):
         self.contribution = torch.Tensor()
@@ -63,10 +63,3 @@ class DemoNetworkForPruning(AbstractNetwork):
             self.fc = nn.Linear(self.fc_ipc_channel * self.fc_ipc_size, 10)
             self.fc.weight = nn.Parameter(fc_weight)
             self.fc.bias = nn.Parameter(fc_bias)
-
-
-if __name__ == "__main__":
-    from Network.AbstractNetwork import network_test
-    from Module.MinimumWeight.MinimumWeight import MinimumWeight
-
-    network_test(DemoNetworkForPruning, MinimumWeight, ipc=1, channels=64 * 5, depth=5, data_size=32)

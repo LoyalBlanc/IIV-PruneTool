@@ -15,10 +15,9 @@ class AbstractNetwork(nn.Module):
         self.hook = None
         self.regularization = 0
 
+    @abstractmethod
     def forward(self, x):
-        for conv in self.conv_trunk:
-            x = conv(x)
-        return x
+        pass
 
     def before_pruning_network(self):
         def calculate_regularization(network, input_tensor, output_tensor):
