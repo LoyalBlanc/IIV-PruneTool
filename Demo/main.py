@@ -1,7 +1,7 @@
 import os
 from Demo.Model import BasicConv, DemoNetworkForTraining, DemoNetworkForPruning
 from Demo.Function import train_model, valid_model
-from Module.MinimumWeight.MinimumWeight import MinimumWeight
+from Module.ModuleParameter.MinimumWeight import MinimumWeight
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 

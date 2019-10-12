@@ -44,7 +44,7 @@ def valid_model(model, batch_size=10000):
 if __name__ == "__main__":
     import os
     from Demo.Model import DemoNetworkForPruning
-    from Module.MinimumWeight.MinimumWeight import MinimumWeight
+    from Module.ModuleParameter.MinimumWeight import MinimumWeight
 
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     torch.manual_seed(229)
