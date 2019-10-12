@@ -21,7 +21,7 @@ class AbstractModule(nn.Module):
         self.regularization = 0
 
     @abstractmethod
-    def forward(self, *x):
+    def forward(self, x):
         pass
 
     @abstractmethod
