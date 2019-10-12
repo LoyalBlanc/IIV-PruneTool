@@ -22,6 +22,7 @@ class AbstractNetwork(nn.Module):
 
     def before_pruning_network(self):
         def calculate_regularization(network, input_tensor, output_tensor):
+            network.regularization = 0
             for module in network.conv_trunk:
                 network.regularization += module.regularization
 

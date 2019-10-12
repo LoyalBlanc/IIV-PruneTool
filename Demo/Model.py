@@ -15,11 +15,11 @@ class BasicConv(nn.Module):
 
 
 class DemoNetworkForTraining(nn.Module):
-    def __init__(self, module, data_size=32):
+    def __init__(self, module):
         super().__init__()
-        self.conv_trunk = nn.ModuleList([module(1, 64), module(64, 64, 2), module(64, 64),
-                                         module(64, 64, 2), module(64, 64)])
-        self.fc = nn.Linear(4 * data_size ** 2, 10)
+        self.conv_trunk = nn.ModuleList([module(1, 64, 2), module(64, 64, 2), module(64, 64, 2),
+                                         module(64, 64, 2), module(64, 64, 2)])
+        self.fc = nn.Linear(64, 10)
 
     def forward(self, x):
         for conv in self.conv_trunk:
@@ -28,12 +28,13 @@ class DemoNetworkForTraining(nn.Module):
 
 
 class DemoNetworkForPruning(AbstractNetwork):
-    def __init__(self, module, data_size=32):
+    def __init__(self, module):
         super().__init__()
-        self.conv_trunk.extend([module(1, 64), module(64, 64, 2), module(64, 64), module(64, 64, 2), module(64, 64)])
+        self.conv_trunk.extend([module(1, 64, 2), module(64, 64, 2), module(64, 64, 2),
+                                module(64, 64, 2), module(64, 64, 2)])
 
         self.fc_ipc_channel = 64
-        self.fc_ipc_size = data_size ** 2 // 16
+        self.fc_ipc_size = 1
         self.fc = nn.Linear(self.fc_ipc_channel * self.fc_ipc_size, 10)
 
     def forward(self, x):
@@ -66,6 +67,6 @@ class DemoNetworkForPruning(AbstractNetwork):
 
 if __name__ == "__main__":
     from Network.AbstractNetwork import network_test
-    from Module.MinimumWeight.MinimumWeight import Basic
+    from Module.MinimumWeight.MinimumWeight import MinimumWeight
 
-    network_test(DemoNetworkForPruning, Basic, ipc=1, channels=64 * 5, depth=5, data_size=32)
+    network_test(DemoNetworkForPruning, MinimumWeight, ipc=1, channels=64 * 5, depth=5, data_size=32)
