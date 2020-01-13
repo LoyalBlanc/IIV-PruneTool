@@ -1,5 +1,5 @@
-# PruneConv
- 
-Basic
+# IIV Prune Tools v1.0
 
-GateDecorator
+* Author: Blanc
+* Tel: 13918670229
+* E-mail: 1931604@tongji.edu.cn
