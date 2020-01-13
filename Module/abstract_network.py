@@ -17,7 +17,8 @@ class AbstractNetwork(nn.Module):
             feature = x if layer_index == 0 else \
                 np.sum([features[link] for link in utils.get_related_row(self.link_matrix, layer_index)])
             features.append(layer(feature))
-        return x
+            # print(layer(feature).shape)
+        return features[-1]
 
     def link_matrix_analysis(self):
         self.link_matrix = np.tril(self.link_matrix, k=-1)

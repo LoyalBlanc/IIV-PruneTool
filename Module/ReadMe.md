@@ -28,7 +28,7 @@
             self.link_matrix = link_matrix # 定义不同层之间的连接关系
         
         # def forward(self, *input):
-        # 不再需要写forward函数
+        # 基本的backbone不再需要写forward函数
     ```
 
 **更多内容可参考demo.py**
