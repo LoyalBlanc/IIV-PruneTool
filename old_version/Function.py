@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.optim import Adam
-from Demo.Dataset import get_train_loader, get_valid_loader
+from old_version.Dataset import get_train_loader, get_valid_loader
 
 
 def train_model(model, epochs=10, batch_size=10000, lr=1e-3, regular=False):
@@ -43,8 +43,8 @@ def valid_model(model, batch_size=10000):
 
 if __name__ == "__main__":
     import os
-    from Demo.Model import DemoNetworkForPruning
-    from Module.ModuleParameter.MinimumWeight import MinimumWeight
+    from old_version.Model import DemoNetworkForPruning
+    from old_version.MinimumWeight import MinimumWeight
 
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     torch.manual_seed(229)
