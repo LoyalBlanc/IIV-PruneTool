@@ -47,29 +47,30 @@ class DemoNet(an.AbstractNetwork):
 
 if __name__ == "__main__":
     torch.manual_seed(229)
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-    # # Prepare the demo network
-    # demo_net = DemoNet()
-    # demo_net.before_training()
-    # mnist.train_model(demo_net, epochs=100, batch_size=3000, regular=True)
-    # demo_net.after_training()
-    # mnist.save_param(demo_net, "demo_param.pkl")
+    # Prepare the demo network
+    demo_net = DemoNet()
+    demo_net.before_training()
+    mnist.train_model(demo_net, epochs=100, batch_size=3000, regular=True)
+    demo_net.after_training()
+    mnist.save_param(demo_net, "demo_param.pkl")
 
-    # # One shot pruning with fine-tuning
-    # demo_net = DemoNet()
-    # mnist.load_param(demo_net, "demo_param.pkl")
-    # mnist.valid_model(demo_net, batch_size=2500)  # 94.99
-    # demo_data = Variable(torch.rand(1, 1, 32, 32), requires_grad=True)
-    # pm.one_shot_prune(demo_net.cpu(), demo_data, method="minimum_weight", prune_ratio=0.1)
-    # mnist.valid_model(demo_net, batch_size=2500)  # 91.05
-    # mnist.train_model(demo_net, epochs=10, batch_size=3000, regular=False)
-    # mnist.valid_model(demo_net, batch_size=2500)  # 95.49
+    # One shot pruning with fine-tuning
+    demo_net = DemoNet()
+    mnist.load_param(demo_net, "demo_param.pkl")
+    mnist.valid_model(demo_net, batch_size=2500)  # 94.97 / FLOPs 600064
+    demo_data = Variable(torch.rand(1, 1, 32, 32), requires_grad=True)
+    pm.one_shot_prune(demo_net.cpu(), demo_data, method="minimum_weight", prune_ratio=0.1)
+    mnist.valid_model(demo_net, batch_size=2500)  # 92.02 / FLOPs 538624
+    mnist.train_model(demo_net, epochs=10, batch_size=3000, regular=False)
+    mnist.valid_model(demo_net, batch_size=2500)  # 95.89 / FLOPs 538624
 
     # Iterative pruning cut with fine-tuning
     demo_net = DemoNet()
-    # mnist.load_param(demo_net, "demo_param.pkl")
+    mnist.load_param(demo_net, "demo_param.pkl")
     demo_net.cuda()
-    # mnist.valid_model(demo_net, batch_size=2500)  # 94.99
+    mnist.valid_model(demo_net, batch_size=2500)  # 94.97 / FLOPs 600064
     demo_data = Variable(torch.rand(1, 1, 32, 32), requires_grad=True)
     pm.iterative_prune(demo_net, demo_data, mnist.get_train_loader(2500), method="minimum_weight", prune_ratio=0.1)
+    mnist.valid_model(demo_net, batch_size=2500)  # 94.90 / FLOPs 538624
