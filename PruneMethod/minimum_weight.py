@@ -2,11 +2,11 @@ import torch
 
 
 def find_minimum_weight(network):
-    layer_score = [torch.norm(channel_weight, p=2).item() for channel_weight in network.conv_trunk[0].conv.weight]
+    layer_score = [torch.norm(channel_weight, p=2).item() for channel_weight in network.layer_trunk[0].conv.weight]
     minimum_weight = min(layer_score)
     layer_index = 0
     channel_index = layer_score.index(minimum_weight)
-    for index, layer in enumerate(network.conv_trunk[1:-1]):
+    for index, layer in enumerate(network.layer_trunk[1:-1]):
         layer_score = [torch.norm(channel_weight, p=2).item() for channel_weight in layer.conv.weight]
         temp_minimum_weight = min(layer_score)
         if temp_minimum_weight < minimum_weight:
@@ -14,6 +14,12 @@ def find_minimum_weight(network):
             layer_index = index + 1
             channel_index = layer_score.index(minimum_weight)
     return layer_index, channel_index, minimum_weight
+
+
+def prune_one_channel(network):
+    layer_index, channel_index, minimum_weight = find_minimum_weight(network)
+    network.prune(layer_index, channel_index)
+    print("Prune Channel %d in Layer %d (Weight %.4f)." % (layer_index, channel_index, minimum_weight))
 
 
 if __name__ == "__main__":
