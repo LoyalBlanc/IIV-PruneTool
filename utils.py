@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 import torch.nn as nn
 
 
@@ -32,7 +31,9 @@ def list_extend_row_col(matrix, related_layer_index):
 
 
 def get_model_flops(network, data):
+    network.eval()
     flops = []
+    child_hook = []
 
     def conv_hook(self, input_tensor, output_tensor):
         batch_size, _, _, _ = input_tensor[0].size()
@@ -49,17 +50,19 @@ def get_model_flops(network, data):
         children = list(net.children())
         if not children:
             if isinstance(net, nn.Conv2d):
-                net.register_forward_hook(conv_hook)
+                child_hook.append(net.register_forward_hook(conv_hook))
             if isinstance(net, nn.BatchNorm2d):
-                net.register_forward_hook(bn_hook)
+                child_hook.append(net.register_forward_hook(bn_hook))
             if isinstance(net, nn.ReLU):
-                net.register_forward_hook(relu_hook)
+                child_hook.append(net.register_forward_hook(relu_hook))
             return
         for child in children:
             register(child)
 
     register(network)
     _ = network(data)
+    for hook in child_hook:
+        hook.remove()
     return sum(flops)
 
 

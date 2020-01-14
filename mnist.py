@@ -63,3 +63,7 @@ def valid_model(model, batch_size=10000):
             total += labels.size(0)
             correct += (predicted == labels.cuda()).sum().item()
     print("Accuracy:{}".format(100 * correct / total))
+
+
+if __name__ == "__main__":
+    pass
