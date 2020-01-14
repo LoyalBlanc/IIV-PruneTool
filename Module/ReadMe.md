@@ -24,14 +24,16 @@
     class DemmoNet(an.AbstractNetwork):
         def __init__(self, layer_trunk, link_matrix):
             an.AbstractNetwork.__init__(self)
-            self.layer_trunk = layer_trunk # 定义每层的性质
-            self.link_matrix = link_matrix # 定义不同层之间的连接关系
+            self.layer_trunk = layer_trunk 
+            # layer_trunk定义每层的性质 推荐使用nn.Sequential格式
+            self.link_matrix = link_matrix 
+            # link_matrix定义不同层之间的连接关系 为防止环路 仅取其严格下三角部分进行剪枝分析
         
         # def forward(self, *input):
         # 基本的backbone不再需要写forward函数
     ```
 
-**更多内容可参考demo.py**
+*更多内容可参考demo.py*
 
 ## 可用基本模块
 * nn.Conv2d

@@ -1,7 +1,8 @@
 import numpy as np
 import torch.nn as nn
-import utils
+
 import Module.basic_module as bm
+from utils import utils
 
 
 class AbstractNetwork(nn.Module):
@@ -10,6 +11,8 @@ class AbstractNetwork(nn.Module):
         self.layer_trunk = None
         self.link_matrix = None
         self.prune_relationship = None
+        self.hook = None
+        self.regularization = 0
 
     def forward(self, x):
         features = []
