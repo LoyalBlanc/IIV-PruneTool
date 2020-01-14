@@ -1,7 +1,7 @@
 import numpy as np
 import torch.nn as nn
-from utils import get_related_row, get_extend_row_col
-from Module.basic_module import BasicModule, Conv2d
+import utils
+import Module.basic_module as bm
 
 
 class AbstractNetwork(nn.Module):
@@ -15,7 +15,7 @@ class AbstractNetwork(nn.Module):
         features = []
         for layer_index, layer in enumerate(self.layer_trunk):
             feature = x if layer_index == 0 else \
-                np.sum([features[link] for link in get_related_row(self.link_matrix, layer_index)])
+                np.sum([features[link] for link in utils.get_related_row(self.link_matrix, layer_index)])
             features.append(layer(feature))
         return x
 
@@ -23,9 +23,11 @@ class AbstractNetwork(nn.Module):
         self.link_matrix = np.tril(self.link_matrix, k=-1)
         self.prune_relationship = []
         for layer_index in range(len(self.layer_trunk)):
-            self.prune_relationship.append(get_extend_row_col(self.link_matrix, layer_index))
+            self.prune_relationship.append(utils.list_extend_row_col(self.link_matrix, layer_index))
 
     def prune(self, layer_index, channel_index):
+        if self.prune_relationship is None:
+            self.link_matrix_analysis()
         prune_opc_list, prune_ipc_list = self.prune_relationship[layer_index]
         for prune_opc_index in prune_opc_list:
             self.layer_trunk[prune_opc_index].prune_opc(channel_index)
@@ -36,14 +38,13 @@ class AbstractNetwork(nn.Module):
 class TestNet(AbstractNetwork):
     def __init__(self):
         AbstractNetwork.__init__(self)
-        self.layer_trunk = nn.Sequential(BasicModule(4, 5, 3), BasicModule(5, 5, 3),
-                                         BasicModule(5, 5, 3), Conv2d(5, 4, 3, padding=1))
+        self.layer_trunk = nn.Sequential(bm.BasicModule(4, 5, 3), bm.BasicModule(5, 5, 3),
+                                         bm.BasicModule(5, 5, 3), bm.Conv2d(5, 4, 3, padding=1))
 
         self.link_matrix = np.array([[0, 0, 0, 0],
                                      [1, 0, 0, 0],
                                      [1, 1, 0, 0],
                                      [1, 1, 1, 0]])
-        self.link_matrix_analysis()
 
 
 if __name__ == "__main__":
