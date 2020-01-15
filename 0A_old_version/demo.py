@@ -1,12 +1,11 @@
 import os
 
 import numpy as np
-import torch
-import torch.nn as nn
-
 import old_version.Module.abstract_network as an
 import old_version.Module.basic_module as bm
 import old_version.PruningMethod.methods as pm
+import torch
+import torch.nn as nn
 from old_version.utils import mnist
 
 

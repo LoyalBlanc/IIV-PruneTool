@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-def network_analysis(network, example_data=torch.zeros([1, 1, 32, 32])):
+def network_analysis(network, input_channel):
     def backtracking(tree_dict, key_number, key_list):
         return_list = []
         for in_item in tree_dict[key_number]:
@@ -12,6 +12,7 @@ def network_analysis(network, example_data=torch.zeros([1, 1, 32, 32])):
                 return_list += backtracking(tree_dict, in_item, key_list)
         return return_list
 
+    example_data = torch.zeros([1, input_channel, 32, 32])
     trace, _ = torch.jit.get_trace_graph(network, example_data)
     torch.onnx._optimize_trace(trace, torch.onnx.OperatorExportTypes.ONNX)
     node_list = list(trace.graph().nodes())

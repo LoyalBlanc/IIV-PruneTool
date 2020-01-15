@@ -1,7 +1,6 @@
 import numpy as np
-import torch.nn as nn
-
 import old_version.Module.basic_module as bm
+import torch.nn as nn
 from old_version.utils import utils
 
 

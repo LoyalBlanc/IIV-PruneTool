@@ -1,6 +1,5 @@
-import torch
-
 import old_version.Module.basic_module as bm
+import torch
 
 
 def find_minimum_weight(network):

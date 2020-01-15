@@ -1,6 +1,6 @@
 # import torch
 # import torch.nn as nn
-# from old_version.Module.AbstractModule import AbstractModule
+# from 0A_old_version.Module.AbstractModule import AbstractModule
 #
 #
 # class GbnModule(AbstractModule):

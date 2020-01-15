@@ -1,11 +1,10 @@
 import copy
 
+import old_version.PruningMethod.minimum_weight as mw
 import torch
 import torch.nn as nn
-from torch.optim import Adam
-
-import old_version.PruningMethod.minimum_weight as mw
 from old_version.utils.utils import get_model_flops
+from torch.optim import Adam
 
 
 def get_the_method_library(method):
