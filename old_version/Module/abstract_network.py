@@ -1,8 +1,8 @@
 import numpy as np
 import torch.nn as nn
 
-import Module.basic_module as bm
-from utils import utils
+import old_version.Module.basic_module as bm
+from old_version.utils import utils
 
 
 class AbstractNetwork(nn.Module):

@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 from torch.optim import Adam
 
-import PruningMethod.minimum_weight as mw
-from utils.utils import get_model_flops
+import old_version.PruningMethod.minimum_weight as mw
+from old_version.utils.utils import get_model_flops
 
 
 def get_the_method_library(method):
@@ -18,8 +18,6 @@ def get_the_method_library(method):
 
 def prepare_pruning(network, example_data, method, prune_ratio):
     network.cuda()
-    example_data = torch.zeros(1, 1, 32, 32).cuda() \
-        if example_data is None else example_data.cuda()
     method_library = get_the_method_library(method)
     flops_now = get_model_flops(network, example_data)
     flops_target = int(flops_now * (1 - prune_ratio))
@@ -43,7 +41,7 @@ def training_with_regularization(network, dataset, criterion, optimizer, method_
 
 
 def one_shot_prune(network,
-                   example_data=None,
+                   example_data=torch.zeros(1, 1, 32, 32).cuda(),
                    method="minimum_weight",
                    prune_ratio=0.1):
     print("Start one-shot pruning.")
@@ -58,7 +56,7 @@ def one_shot_prune(network,
 
 def iterative_prune(network,
                     dataset,
-                    example_data=None,
+                    example_data=torch.zeros(1, 1, 32, 32).cuda(),
                     method="minimum_weight",
                     prune_ratio=0.1,
                     criterion=nn.MSELoss(),
@@ -79,7 +77,7 @@ def iterative_prune(network,
 
 def automotive_prune(network,
                      dataset,
-                     example_data=None,
+                     example_data=torch.zeros(1, 1, 32, 32).cuda(),
                      method="minimum_weight",
                      prune_ratio=0.1,
                      criterion=nn.MSELoss(),

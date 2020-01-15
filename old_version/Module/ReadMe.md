@@ -21,7 +21,7 @@
 3. 网络继承从torch.nn改为bn
     ```
     # class DemoNet(nn.Module): pass
-    class DemmoNet(an.AbstractNetwork):
+    class DemoNet(an.AbstractNetwork):
         def __init__(self, layer_trunk, link_matrix):
             an.AbstractNetwork.__init__(self)
             self.layer_trunk = layer_trunk 

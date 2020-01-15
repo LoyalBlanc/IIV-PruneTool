@@ -1,6 +1,6 @@
 import torch
 
-import Module.basic_module as bm
+import old_version.Module.basic_module as bm
 
 
 def find_minimum_weight(network):
@@ -42,7 +42,7 @@ def after_training(network):
 
 if __name__ == "__main__":
     from torch import rand, Size
-    from Module.abstract_network import TestNet
+    from old_version.Module.abstract_network import TestNet
 
     test_data = rand(1, 4, 16, 16)
     test_net = TestNet()

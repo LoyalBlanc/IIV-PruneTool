@@ -47,7 +47,7 @@
         FLOPs: 538624,  Loss: 8.0119
         Successfully prune the network, the FLOPs now is 538624
         
-3. 自动剪枝 
+3. 自动剪枝  
     每次剪枝后重新训练网络直至loss下降或超过预设训练轮数：
     ```
     pm.automotive_prune(

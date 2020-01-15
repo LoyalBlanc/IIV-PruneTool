@@ -4,10 +4,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-import Module.abstract_network as an
-import Module.basic_module as bm
-import PruningMethod.methods as pm
-from utils import mnist
+import old_version.Module.abstract_network as an
+import old_version.Module.basic_module as bm
+import old_version.PruningMethod.methods as pm
+from old_version.utils import mnist
 
 
 class DemoNet(an.AbstractNetwork):
