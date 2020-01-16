@@ -1,4 +1,4 @@
-# Method v0.2
+# Method v0.3
 
 ## 使用方法
 0. 声明调用  
@@ -23,7 +23,7 @@
         ...  
         Prune Channel 1 in Layer 29 (Weight 0.0160).  
         Successfully prune the network, the FLOPs now is 538624
-    
+<del>
 2. 迭代式剪枝  
     每次剪枝后重新训练一轮网络直至达到期望的剪枝率：
     ```
@@ -73,5 +73,5 @@
         Loss: 15.3847, Step Loss: 14.9309  
         Exceed the epoch limit and terminate pruning, the FLOPs now is 587776  
         Successfully prune the network, the FLOPs now is 587776  
-
+</del>
 *更多内容可参考demo.py*

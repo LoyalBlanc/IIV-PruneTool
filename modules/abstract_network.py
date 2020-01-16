@@ -27,6 +27,9 @@ class AbstractNetwork(nn.Module):
     def __init__(self):
         nn.Module.__init__(self)
         self.layer_name_link = {}
+        self.prune_score_range = []
+        self.hook = None
+        self.regularization = None
 
     @abstractmethod
     def forward(self, input_tensor):
@@ -61,8 +64,19 @@ class AbstractNetwork(nn.Module):
                 for item in self.layer_name_link[object_name].up:
                     self.append_new_node(container_node, item, 0)
 
+    def prune(self, module, channel):
+        module_node = self.layer_name_link[module]
+        opc, ipc = module_node.opc, module_node.ipc
+        for item in opc:
+            eval('self.' + item).prune_opc(channel)
+        for item in ipc:
+            eval('self.' + item).prune_ipc(channel)
+
+    def get_modules(self):
+        return self._modules
+
     def __repr__(self):
-        info = ''
+        info = nn.Module.__repr__(self) + '\n'
         for item in self.layer_name_link:
             info += self.layer_name_link[item].get_info()
         return info
