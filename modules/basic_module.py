@@ -8,6 +8,11 @@ class BasicModule(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, connect_flag=False):
+        """
+        connect_flag:
+            True:   Pruning after previous node automatically
+            False:  Pruning node
+        """
         self.connect_flag = connect_flag
 
     @abstractmethod

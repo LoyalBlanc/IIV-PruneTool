@@ -1,5 +1,3 @@
-import os
-
 import torch
 import torch.nn as nn
 
@@ -35,8 +33,9 @@ class DemoNet(an.AbstractNetwork):
 
 
 if __name__ == "__main__":
+    import os
     from torch.optim import Adam
-    import method.abstract_method as pruning_methods
+    import methods.abstract_method as pruning_methods
     import utils.utils_mnist as utils_mnist
 
     torch.manual_seed(229)
@@ -45,9 +44,9 @@ if __name__ == "__main__":
 
     def basic_training(network, dataset, epochs):
         network.cuda()
-        optimizer = Adam(demo_net.parameters(), lr=1e-3)
+        optimizer = Adam(demo_net.parameters())
         for epoch in range(epochs):
-            step_loss = pruning_tool.training_once(demo_net, dataset, nn.CrossEntropyLoss(), optimizer)
+            step_loss = pruning_tool.train_model_once(demo_net, dataset, nn.CrossEntropyLoss(), optimizer)
             print('Epoch [{}/{}],  Loss: {:.4f}'.format(epoch + 1, epochs, step_loss))
 
 
@@ -58,7 +57,7 @@ if __name__ == "__main__":
     2: 20 epochs iterative pruning
     3: 20 epochs automatic pruning
     """
-    demo_flag = 0
+    demo_flag = 2
     demo_net = DemoNet()
     pruning_tool = pruning_methods.PruningTool(input_channel=1)
     training_dataset = utils_mnist.get_train_loader(1000)
@@ -70,14 +69,14 @@ if __name__ == "__main__":
     elif demo_flag == 1:
         utils_mnist.load_param(demo_net, "demo_param.pkl")
         pruning_tool.one_shot_pruning(demo_net)
-        utils_mnist.valid_model(demo_net, batch_size=1000)  # 100 Epochs / Acc:0 / FLOPs:305152
+        utils_mnist.valid_model(demo_net, batch_size=1000)  # 100 Epochs / Acc:0 / FLOPs:0
         basic_training(demo_net, training_dataset, 20)
-        utils_mnist.valid_model(demo_net, batch_size=1000)  # 120 Epochs / Acc:0 / FLOPs:305152
+        utils_mnist.valid_model(demo_net, batch_size=1000)  # 120 Epochs / Acc:0 / FLOPs:0
     elif demo_flag == 2:
         utils_mnist.load_param(demo_net, "demo_param.pkl")
-        pruning_tool.iterative_pruning(demo_net, training_dataset, nn.CrossEntropyLoss())
-        utils_mnist.valid_model(demo_net, batch_size=1000)  # 120 Epochs / Acc:0 / FLOPs:305152
+        pruning_tool.iterative_pruning(demo_net, training_dataset, nn.CrossEntropyLoss(), epoch_interval=2)
+        utils_mnist.valid_model(demo_net, batch_size=1000)  # 000 Epochs / Acc:0 / FLOPs:0
     elif demo_flag == 3:
         utils_mnist.load_param(demo_net, "demo_param.pkl")
         pruning_tool.automatic_pruning(demo_net, training_dataset, nn.CrossEntropyLoss())
-        utils_mnist.valid_model(demo_net, batch_size=1000)  # 0 Epochs / Acc:0 / FLOPs:305152
+        utils_mnist.valid_model(demo_net, batch_size=1000)  # 000 Epochs / Acc:0 / FLOPs:0

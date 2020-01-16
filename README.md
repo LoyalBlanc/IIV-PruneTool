@@ -1,4 +1,4 @@
-# IIV Prune Tools v0.3
+# IIV Pruning Tools v0.3
 
 * Author: Blanc
 * Tel: 13918670229
