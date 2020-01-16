@@ -24,6 +24,7 @@ class PruningTool(object):
 
     def prepare_pruning(self, network):
         network.cuda()
+        network.eval()
         flops_now = utils_torch.get_model_flops(network, self.example_data)
         flops_target = int(flops_now * (1 - self.pruning_rate))
         print("FLOPs before pruning is %d, target is %d." % (flops_now, flops_target))
@@ -75,6 +76,7 @@ class PruningTool(object):
 
     def training_once(self, network, dataset, criterion, optimizer):
         self.method.before_training(network)
+        network.train()
         step_loss = 0
         for index, (images, labels) in enumerate(dataset):
             outputs = network(images.cuda())
@@ -85,4 +87,5 @@ class PruningTool(object):
             optimizer.step()
             step_loss += loss.item()
         self.method.after_training(network)
+        network.eval()
         return step_loss
