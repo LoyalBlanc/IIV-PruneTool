@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 import torch.nn as nn
 
-import utils.utils_torch as ut
+import utils.utils_torch as utils_torch
 
 
 class LinkNode(object):
@@ -36,7 +36,7 @@ class AbstractNetwork(nn.Module):
         pass
 
     def network_analysis(self, input_channel):
-        node_index2name, layer_index_link = ut.network_link_analysis(self, input_channel)
+        node_index2name, layer_index_link = utils_torch.network_link_analysis(self, input_channel)
         for node_index in layer_index_link:
             self.layer_name_link[node_index2name[node_index]] = LinkNode(node_index2name[node_index])
         for node_index in layer_index_link:
@@ -52,25 +52,36 @@ class AbstractNetwork(nn.Module):
 
     def append_new_node(self, container_node, object_name, target_place=0):
         connect_flag = eval("self." + object_name).connect_flag
-        if connect_flag or target_place == 0:
+        if connect_flag:
+            for item in self.layer_name_link[object_name].down:
+                self.append_new_node(container_node, item, 1)
+            for item in self.layer_name_link[object_name].up:
+                self.append_new_node(container_node, item, 0)
+
+        elif target_place == 0:
             if object_name not in container_node.opc:
                 container_node.opc.append(object_name)
                 for item in self.layer_name_link[object_name].down:
                     self.append_new_node(container_node, item, 1)
 
-        if connect_flag or target_place == 1:
+        elif target_place == 1:
             if object_name not in container_node.ipc:
                 container_node.ipc.append(object_name)
                 for item in self.layer_name_link[object_name].up:
                     self.append_new_node(container_node, item, 0)
 
     def prune(self, module, channel):
+        info = 'Layer '
         module_node = self.layer_name_link[module]
         opc, ipc = module_node.opc, module_node.ipc
         for item in opc:
+            info += "%s, " % item
             eval('self.' + item).prune_opc(channel)
+            for sub_item in self.layer_name_link[item].down:
+                eval('self.' + sub_item).prune_ipc(channel)
         for item in ipc:
             eval('self.' + item).prune_ipc(channel)
+        return info
 
     def get_modules(self):
         return self._modules

@@ -22,6 +22,6 @@
 *更多内容可参考demo.py*
 
 ## 目前可用的模块(2020.01.16)
-* nn.Conv2d
-* nn.BatchNorm2d
+* bm.Conv2d
+* bm.BatchNorm2d
 * 激活函数可以直接调用nn,不影响剪枝

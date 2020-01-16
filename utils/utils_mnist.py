@@ -22,6 +22,14 @@ def get_valid_loader(batch_size=100):
     return valid_loader
 
 
+def save_param(model, save_path):
+    torch.save(model.state_dict(), save_path)
+
+
+def load_param(model, save_path):
+    model.load_state_dict(torch.load(save_path), strict=True)
+
+
 def train_model(model, epochs=10, batch_size=10000, lr=1e-3, regular=False):
     model.cuda()
     model.train()
@@ -40,14 +48,6 @@ def train_model(model, epochs=10, batch_size=10000, lr=1e-3, regular=False):
             optimizer.step()
             sum_loss += loss.item()
         print('Epoch [{}/{}],  Loss: {:.4f}'.format(epoch + 1, epochs, sum_loss))
-
-
-def save_param(model, save_path):
-    torch.save(model.state_dict(), save_path)
-
-
-def load_param(model, save_path):
-    model.load_state_dict(torch.load(save_path), strict=True)
 
 
 def valid_model(model, batch_size=10000):
