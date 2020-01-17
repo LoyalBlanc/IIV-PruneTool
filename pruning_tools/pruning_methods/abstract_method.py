@@ -83,3 +83,13 @@ def iterative_pruning(network, dataset, example_data, method, pruning_rate, crit
 
     print("Successfully prune the network, the FLOPs now is %d" % flops_now)
     return network
+
+
+def automatic_pruning(network, dataset, example_data, method, pruning_rate, criterion, lr, epochs):
+    example_data = example_data.cuda()
+    print("Start automatic pruning.")
+    flops_target, method_module = _prepare_pruning(network, example_data, method, pruning_rate)
+    flops_now = flops_target + 1
+    # Todo: automatic_pruning
+    print("Successfully prune the network, the FLOPs now is %d" % flops_now)
+    return network
