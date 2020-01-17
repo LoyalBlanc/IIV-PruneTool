@@ -30,11 +30,13 @@ def detect_network(network, input_data):
         unit_index = node.outputs().__next__().unique()
         node_index_link[unit_index] = []
         node_name = _get_node_name(list(node.inputs())[-1].debugName())
+
         # only append existing operations
         for input_node in node.inputs():
             input_index = input_node.unique()
             if input_index == 0 or input_index in node_index_link.keys():
                 node_index_link[unit_index].append(input_index)
+
         # backtrace units
         if node.kind() in SUPPORT_LAYER_TUPLE:
             eval("network" + node_name).is_layer = True
@@ -48,14 +50,19 @@ def detect_network(network, input_data):
     unit_name_dict = {}
     for unit_index in unit_index_link:
         unit_name_dict[unit_index2name[unit_index]] = LinkNode(unit_index2name[unit_index])
+
+    # Constructing a doubly-linked-list-like object
     for unit_index in unit_index_link:
         unit_name = unit_index2name[unit_index]
-        # Constructing a doubly-linked-list-like object
         for linked_unit_index in unit_index_link[unit_index]:
             if linked_unit_index != 0:
                 linked_unit_name = unit_index2name[linked_unit_index]
                 unit_name_dict[unit_name].previous.append(linked_unit_name)
                 unit_name_dict[linked_unit_name].next.append(unit_name)
+
+    # for unit_name in unit_name_dict:
+    #     if not unit_name_dict[unit_name].next:
+    #         unit_name_dict[unit_name].next.append('Output_tensor')
 
     for unit_name in unit_name_dict:
         unit = unit_name_dict[unit_name]
@@ -83,6 +90,9 @@ def _get_node_name(describe):
 
 
 def _insert_unit(network, container_node, object_name, unit_name_dict, target_place=0):
+    # if not hasattr(network, object_name):
+    #     container_node.affect_opc.append(object_name)
+
     if not eval("network" + object_name).is_layer:
         for unit in unit_name_dict[object_name].next:
             _insert_unit(network, container_node, unit, unit_name_dict, 1)

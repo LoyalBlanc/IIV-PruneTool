@@ -5,7 +5,7 @@ from network_analyzer import support_modules
 from network_analyzer import network_detector
 
 
-def analyze_network(network, input_data, verbose=False, for_pruning=False):
+def analyze_network(network, input_data, verbose=False, for_pruning=True):
     network.cuda()
     unit_dict = network_detector.detect_network(network, input_data.cuda())
     if verbose:
@@ -13,6 +13,9 @@ def analyze_network(network, input_data, verbose=False, for_pruning=False):
         print(network_detector.get_unit_name_dict_info(unit_dict))
     if for_pruning:
         network.unit_dict = unit_dict
+        network.pruning_range = []
+        network.hook = None
+        network.regularization = 0
         for unit_name in unit_dict.keys():
             unit = eval("network" + unit_name)
             if unit.is_layer:
@@ -21,9 +24,6 @@ def analyze_network(network, input_data, verbose=False, for_pruning=False):
                 _non_layer_change(unit)
         network.prune_spec_channel = types.MethodType(_network_prune_spec_channel, network)
         network.cpu()
-        if verbose:
-            print(network.__repr__)
-            print(network_detector.get_unit_name_dict_info(unit_dict))
 
 
 # Todo:
@@ -67,5 +67,13 @@ if __name__ == "__main__":
 
     model = models.resnet18()
     analyze_network(model, torch.ones(1, 3, 224, 224))
-    model.prune_spec_channel('.conv1', 0)
-    print(model(torch.ones(1, 3, 224, 224)).shape)
+    for test_unit_name in model.unit_dict:
+        model_backup = models.resnet18()
+        analyze_network(model_backup, torch.ones(1, 3, 64, 64))
+        test_unit = eval("model_backup" + test_unit_name)
+        if test_unit.is_layer:
+            model_backup.prune_spec_channel(test_unit_name, 0)
+            try:
+                _ = model_backup(torch.ones(1, 3, 224, 224))
+            except Exception as e:
+                print(test_unit_name, e)
