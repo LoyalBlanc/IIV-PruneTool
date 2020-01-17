@@ -64,7 +64,7 @@ class AbstractNetwork(nn.Module):
             self._insert_node(node, node.name, 0)
 
     def _insert_node(self, container_node, object_name, target_place=0):
-        connect_flag = eval("self." + object_name).connect_flag
+        connect_flag = eval("self" + object_name).connect_flag
         if connect_flag:
             for node in self._layer_name_link[object_name].down:
                 self._insert_node(container_node, node, 1)
@@ -89,11 +89,11 @@ class AbstractNetwork(nn.Module):
         layer_prune_opc, layer_prune_ipc = spec_layer.opc, spec_layer.ipc
         for layer in layer_prune_opc:
             layer_info += "%s, " % layer
-            eval('self.' + layer).prune_opc(channel)
+            eval('self' + layer).prune_opc(channel)
             for sub_layer in self._layer_name_link[layer].down:
-                eval('self.' + sub_layer).prune_ipc(channel)
+                eval('self' + sub_layer).prune_ipc(channel)
         for layer in layer_prune_ipc:
-            eval('self.' + layer).prune_ipc(channel)
+            eval('self' + layer).prune_ipc(channel)
         return layer_info
 
     def get_layer_name_link(self):

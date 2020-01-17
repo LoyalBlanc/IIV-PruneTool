@@ -20,14 +20,6 @@ def get_valid_loader(batch_size=100):
     return valid_loader
 
 
-def save_param(model, save_path):
-    torch.save(model.state_dict(), save_path)
-
-
-def load_param(model, save_path):
-    model.load_state_dict(torch.load(save_path), strict=True)
-
-
 def valid_model(model, batch_size=10000):
     model.cuda()
     model.eval()

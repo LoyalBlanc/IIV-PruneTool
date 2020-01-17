@@ -1,6 +1,11 @@
 import torch
 import torch.nn as nn
 
+support_module_list = (
+    'onnx::Conv',
+    'onnx::BatchNormalization',
+)
+
 
 def network_link_analysis(network, input_channel):
     def backtracking(tree_dict, key_number, key_list):
@@ -16,14 +21,18 @@ def network_link_analysis(network, input_channel):
     trace, _ = torch.jit.get_trace_graph(network, example_data)
     torch.onnx._optimize_trace(trace, torch.onnx.OperatorExportTypes.ONNX)
     node_list = list(trace.graph().nodes())
-    detect_list = ('onnx::Conv', 'onnx::BatchNormalization')
+    # print(node_list)
 
     node_index2name = {}
     node_index_link = {}
     layer_index_link = {}
 
     for node in node_list:
-        node_name = node.scopeName().split('[')[-1][:-1]
+        node_name_list = node.scopeName().split('/')[1:]
+        node_name = ''
+        for sub_name in node_name_list:
+            node_name += '.' + sub_name.split('[')[-1][:-1]
+        node_name = node_name
         node_index = node.outputs().__next__().unique()
         node_index2name[node_index] = node_name
         node_index_link[node_index] = []
@@ -31,10 +40,18 @@ def network_link_analysis(network, input_channel):
             input_index = input_node.unique()
             if input_index == 0 or input_index in node_index_link.keys():
                 node_index_link[node_index].append(input_index)
-        if node.kind() in detect_list:
+        if node.kind() in support_module_list:
             layer_index_link[node_index] = backtracking(node_index_link, node_index, layer_index_link.keys())
 
     return node_index2name, layer_index_link
+
+
+def save_param(model, save_path):
+    torch.save(model.state_dict(), save_path)
+
+
+def load_param(model, save_path):
+    model.load_state_dict(torch.load(save_path), strict=True)
 
 
 def get_model_flops(network, data):

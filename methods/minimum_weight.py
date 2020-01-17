@@ -3,18 +3,27 @@ import torch
 
 def prepare_pruning(network):
     layer_name_link = network.get_layer_name_link()
-    module_dict = network.list_modules()
-    for module_name in module_dict:
-        module = module_dict[module_name]
-        if hasattr(module, "connect_flag"):
-            if not module.connect_flag and not layer_name_link[module_name].down == []:
-                network.pruning_range.append(module_name)
+    insert_pruning_node(network, network, '', layer_name_link)
+
+
+def insert_pruning_node(network, node, node_name, layer_link):
+    children = list(node.children())
+    if not children:
+        if hasattr(node, "connect_flag"):
+            if not node.connect_flag and not layer_link[node_name].down == []:
+                network.pruning_range.append(node_name)
+    else:
+        node_dict = node.list_modules()
+        for child in node_dict:
+            child_node = node_dict[child]
+            child_name = node_name + '.' + child
+            insert_pruning_node(network, child_node, child_name, layer_link)
 
 
 def before_training(network):
     def conv_hook(net, input_tensor, output_tensor):
         for module_name in network.pruning_range:
-            module = eval("network." + module_name)
+            module = eval("network" + module_name)
             net.regularization += torch.norm(module.weight, p=1)
 
     network.hook = network.register_forward_hook(conv_hook)
@@ -30,8 +39,8 @@ def prune_network_once(network):
     layer_name_link = network.get_layer_name_link()
     modules_score = {}
     for module_name in network.pruning_range:
-        module_current = eval("network." + module_name)
-        module_next = eval("network." + layer_name_link[module_name].down[0])
+        module_current = eval("network" + module_name)
+        module_next = eval("network" + layer_name_link[module_name].down[0])
 
         layer_norm = torch.Tensor([torch.norm(channel_weight, p=2).item() for channel_weight in module_current.weight])
         layer_bias = module_next.bias
@@ -62,8 +71,8 @@ def prune_network_once(network):
 
 
 if __name__ == "__main__":
-    from demo import DemoNet
+    from demo import DemoNetwork
 
-    demo_net = DemoNet()
+    demo_net = DemoNetwork()
     prepare_pruning(demo_net)
     prune_network_once(demo_net)
