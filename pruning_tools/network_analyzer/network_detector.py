@@ -60,10 +60,6 @@ def detect_network(network, input_data):
                 unit_name_dict[unit_name].previous.append(linked_unit_name)
                 unit_name_dict[linked_unit_name].next.append(unit_name)
 
-    # for unit_name in unit_name_dict:
-    #     if not unit_name_dict[unit_name].next:
-    #         unit_name_dict[unit_name].next.append('Output_tensor')
-
     for unit_name in unit_name_dict:
         unit = unit_name_dict[unit_name]
         _insert_unit(network, unit, unit.name, unit_name_dict, 0)
@@ -90,9 +86,6 @@ def _get_node_name(describe):
 
 
 def _insert_unit(network, container_node, object_name, unit_name_dict, target_place=0):
-    # if not hasattr(network, object_name):
-    #     container_node.affect_opc.append(object_name)
-
     if not eval("network" + object_name).is_layer:
         for unit in unit_name_dict[object_name].next:
             _insert_unit(network, container_node, unit, unit_name_dict, 1)
@@ -124,4 +117,4 @@ if __name__ == "__main__":
 
     model = models.resnet18().cuda()
     unit_dict = detect_network(model, torch.ones(1, 3, 224, 224).cuda())
-    print(get_unit_name_dict_info(unit_dict))
+    # print(get_unit_name_dict_info(unit_dict))

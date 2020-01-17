@@ -7,13 +7,6 @@ def prepare_pruning(network):
     for unit_name in unit_dict.keys():
         if eval("network" + unit_name).is_layer:
             network.pruning_range.append(unit_name)
-    for layer_name in network.pruning_range:
-        if not unit_dict[layer_name].affect_ipc:
-            network.pruning_range.remove(layer_name)
-        else:
-            for sub_layer_name in unit_dict[layer_name].affect_opc:
-                if not unit_dict[unit_dict[sub_layer_name].next[0]].affect_ipc:
-                    network.pruning_range.remove(layer_name)
 
 
 def prune_network_once(network):
@@ -68,18 +61,21 @@ def after_training(network):
 
 if __name__ == "__main__":
     import torchvision.models as models
-    import network_analyzer as nwa
+    from pruning_tools import network_analyzer as nwa
 
     model = models.resnet18()
-    nwa.analyze_network(model, torch.ones(1, 3, 224, 224), verbose=False, for_pruning=True)
+    data = torch.ones(1, 3, 224, 224)
+    nwa.analyze_network(model, data, verbose=False, for_pruning=True)
     prepare_pruning(model)
+
     for test_unit_name in model.pruning_range:
-        test_unit = eval("model" + test_unit_name)
-        if test_unit.is_layer:
-            model.prune_spec_channel(test_unit_name, 0)
-            try:
-                _ = model(torch.ones(1, 3, 224, 224))
-            except Exception as e:
-                print(test_unit_name, e)
+        model_backup = models.resnet18()
+        nwa.analyze_network(model_backup, data, verbose=False, for_pruning=True)
+        model_backup.prune_spec_channel(test_unit_name, 0)
+        try:
+            _ = model_backup(data)
+        except Exception as e:
+            print(test_unit_name, e)
+
     prune_network_once(model)
-    print(model(torch.ones(1, 3, 224, 224)).shape)
+    print(model(data).shape)

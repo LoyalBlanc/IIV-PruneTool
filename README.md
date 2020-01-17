@@ -7,10 +7,19 @@
 ## 使用方法
 0. 声明调用  
     ```
-    import network_analyzer as nwa
+    import pruning_tools as pt
     ```
 1. 一次性剪枝
+    ```
+    ```
     >
 
 2. 迭代式剪枝
+    ```
+    ```
+    >
+
+3. 自动剪枝
+    ```
+    ```
     >
