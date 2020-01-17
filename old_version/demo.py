@@ -64,7 +64,7 @@ if __name__ == "__main__":
     2: 20 epochs iterative pruning
     3: 20 epochs automatic pruning
     """
-    demo_flag = 1
+    demo_flag = -1
 
     training_dataset = utils_mnist.get_train_loader(1000)
     demo_net = DemoNetwork()
