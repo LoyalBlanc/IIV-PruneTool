@@ -47,14 +47,14 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
-    def basic_training(network, dataset, epochs):
+    def basic_training(network, dataset, epochs, save_param=False):
         network.cuda()
         optimizer = Adam(demo_net.parameters())
         for epoch in range(epochs):
             step_loss = pruning_tool.train_model_once(demo_net, dataset, nn.CrossEntropyLoss(), optimizer)
             print('Epoch [{}/{}], Step Loss: {:.4f}'.format(epoch + 1, epochs, step_loss))
-            if step_loss < 0.1:
-                break
+            if save_param and step_loss < 0.1:
+                utils_torch.save_param(demo_net, "demo_param.pkl")
 
 
     """
@@ -70,8 +70,7 @@ if __name__ == "__main__":
     pruning_tool = pruning_methods.PruningTool(input_channel=1)
 
     if demo_flag == 0:
-        basic_training(demo_net, training_dataset, 100)
-        utils_torch.save_param(demo_net, "demo_param.pkl")
+        basic_training(demo_net, training_dataset, epochs=1000, save_param=True)
         utils_mnist.valid_model(demo_net, batch_size=1000)  # 100 Epochs / Acc:87.94 / FLOPs:600064
     elif demo_flag == 1:
         utils_torch.load_param(demo_net, "demo_param.pkl")
