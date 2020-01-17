@@ -20,46 +20,8 @@ class LinkNode(object):
         return repr_info
 
 
-def _backtracking(tree_dict, key_number, key_list):
-    return_list = []
-    for in_item in tree_dict[key_number]:
-        if in_item in key_list or in_item == 0:
-            return_list += [in_item]
-        else:
-            return_list += _backtracking(tree_dict, in_item, key_list)
-    return return_list
-
-
-def _get_node_name(describe):
-    describe_list = describe.split('.')[:-1]
-    name = ''
-    for item in describe_list:
-        name += '[' + item + ']' if item.isdigit() else '.' + item
-    return name
-
-
-def _insert_unit(network, container_node, object_name, unit_name_dict, target_place=0):
-    if not eval("network" + object_name).is_layer:
-        for unit in unit_name_dict[object_name].next:
-            _insert_unit(network, container_node, unit, unit_name_dict, 1)
-        for unit in unit_name_dict[object_name].previous:
-            _insert_unit(network, container_node, unit, unit_name_dict, 0)
-
-    elif target_place == 0:
-        if object_name not in container_node.affect_opc:
-            container_node.affect_opc.append(object_name)
-            for unit in unit_name_dict[object_name].next:
-                _insert_unit(network, container_node, unit, unit_name_dict, 1)
-
-    elif target_place == 1:
-        if object_name not in container_node.affect_ipc:
-            container_node.affect_ipc.append(object_name)
-            for unit in unit_name_dict[object_name].previous:
-                _insert_unit(network, container_node, unit, unit_name_dict, 0)
-
-
-def network_analysis(network, data):
-    graph, _, _ = torch.onnx.utils._model_to_graph(network, data, _retain_param_name=True)
+def detect_network(network, input_data):
+    graph, _, _ = torch.onnx.utils._model_to_graph(network, input_data, _retain_param_name=True)
 
     node_index_link = {}
     unit_index2name = {}
@@ -102,9 +64,54 @@ def network_analysis(network, data):
     return unit_name_dict
 
 
+def _backtracking(tree_dict, key_number, key_list):
+    return_list = []
+    for in_item in tree_dict[key_number]:
+        if in_item in key_list or in_item == 0:
+            return_list += [in_item]
+        else:
+            return_list += _backtracking(tree_dict, in_item, key_list)
+    return return_list
+
+
+def _get_node_name(describe):
+    describe_list = describe.split('.')[:-1]
+    name = ''
+    for sub_desc in describe_list:
+        name += '[' + sub_desc + ']' if sub_desc.isdigit() else '.' + sub_desc
+    return name
+
+
+def _insert_unit(network, container_node, object_name, unit_name_dict, target_place=0):
+    if not eval("network" + object_name).is_layer:
+        for unit in unit_name_dict[object_name].next:
+            _insert_unit(network, container_node, unit, unit_name_dict, 1)
+        for unit in unit_name_dict[object_name].previous:
+            _insert_unit(network, container_node, unit, unit_name_dict, 0)
+
+    elif target_place == 0:
+        if object_name not in container_node.affect_opc:
+            container_node.affect_opc.append(object_name)
+            for unit in unit_name_dict[object_name].next:
+                _insert_unit(network, container_node, unit, unit_name_dict, 1)
+
+    elif target_place == 1:
+        if object_name not in container_node.affect_ipc:
+            container_node.affect_ipc.append(object_name)
+            for unit in unit_name_dict[object_name].previous:
+                _insert_unit(network, container_node, unit, unit_name_dict, 0)
+
+
+def get_unit_name_dict_info(unit_name_dict):
+    info = ''
+    for unit in unit_name_dict:
+        info += unit_name_dict[unit].__repr__() + '\n'
+    return info
+
+
 if __name__ == "__main__":
     import torchvision.models as models
 
-    model = models.resnet18()
-    input_data = torch.ones(1, 3, 224, 224)
-    link = network_analysis(model, input_data)
+    model = models.resnet18().cuda()
+    unit_dict = detect_network(model, torch.ones(1, 3, 224, 224).cuda())
+    print(get_unit_name_dict_info(unit_dict))

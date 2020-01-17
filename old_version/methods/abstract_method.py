@@ -1,6 +1,6 @@
 import methods.minimum_weight as mw
 import torch
-import utils.utils_torch as utils_torch
+from network_analyzer import network_detector as utils_torch
 
 
 class PruningTool(object):
