@@ -2,6 +2,7 @@ import torch
 
 import types
 from pruning_tools.network_analyzer import network_detector
+from .support_modules.__init__ import *
 
 
 def analyze_network(network, input_data, verbose=False, for_pruning=True):
@@ -31,14 +32,14 @@ def analyze_network(network, input_data, verbose=False, for_pruning=True):
 
 def _layer_change(unit):
     # Conv2d
-    module = PruningTools.network_analyzer.support_modules.conv2d
+    module = conv2d
     unit.prune_ipc = types.MethodType(module.layer_prune_ipc, unit)
     unit.prune_opc = types.MethodType(module.layer_prune_opc, unit)
 
 
 def _non_layer_change(unit):
     # BatchNorm2d
-    module = PruningTools.network_analyzer.support_modules.batchnorm2d
+    module = batchnorm2d
     unit.prune_ipc = types.MethodType(module.non_layer_prune, unit)
     if unit.track_running_stats:
         unit.track_running_stats = False
