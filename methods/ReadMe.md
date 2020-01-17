@@ -19,10 +19,16 @@
         ) -> an.AbstractNetwork             # 返回修剪后的网络
     ```
     一次成功的修剪预期输出：
-    >   123  
-        123
+    >   Start one-shot pruning.
+        FLOPs before pruning is 600064, target is 540057.  
+        Pruning Channel 26 in Layer .layer1.c, .layer4.c,  (Score 0.3877)  
+        Pruning Channel 6 in Layer .layer1.c, .layer4.c,  (Score 0.3910)  
+        ...  
+        Pruning Channel 6 in Layer .layer1.c, .layer4.c,  (Score 0.6221)  
+        Successfully prune the network, the FLOPs now is 538624
         
-    
+<del>  
+
 2. 迭代式剪枝
     根据给定的剪枝率对网络进行修剪的同时进行fine-tuning：
     ```
@@ -35,8 +41,15 @@
         ) -> an.AbstractNetwork             # 返回修剪后的网络
     ```
     一次成功的修剪预期输出：
-    >   123  
-        123
+    >   Start iterative pruning.  
+        FLOPs before pruning is 600064, target is 540057.  
+        Pruning Channel 6 in Layer .layer1.c, .layer4.c,  (Score 0.3507)  
+        Epoch 1, FLOPs: 593920, Step Loss: 178.8125  
+        Epoch 2, FLOPs: 593920, Step Loss: 153.6338  
+        Pruning Channel 25 in Layer .layer1.c, .layer4.c,  (Score 0.3836)    
+        ...  
+        
+        
 
 3. 自动剪枝
     在给定的轮次内按Loss值尽可能地修剪网络：
@@ -52,6 +65,9 @@
     一次成功的修剪预期输出：
     >   123  
         123
+
+</del>
+
 
 
 *更多内容可参考demo.py*

@@ -1,4 +1,4 @@
-# IIV Pruning Tools v0.3
+# IIV Pruning Tools v0.4
 
 * Author: Blanc
 * Tel: 13918670229
@@ -17,10 +17,6 @@
 
 
 ## Todo list:
-### Version 0.4 
-1. 修正automatic方法的训练bug
-2. 测试现有剪枝方法在demo network上的效果
-3. 将network_analysis函数从abstract_network中独立一个版本出来
 
 ### Version 0.5 (!!!)
 1. 实现模块转移

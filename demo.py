@@ -44,7 +44,7 @@ if __name__ == "__main__":
     import utils.utils_torch as utils_torch
 
     torch.manual_seed(229)
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
     def basic_training(network, dataset, epochs, save_param=False):
@@ -64,25 +64,26 @@ if __name__ == "__main__":
     2: 20 epochs iterative pruning
     3: 20 epochs automatic pruning
     """
-    demo_flag = 0
+    demo_flag = 1
+
     training_dataset = utils_mnist.get_train_loader(1000)
     demo_net = DemoNetwork()
-    pruning_tool = pruning_methods.PruningTool(input_channel=1)
+    pruning_tool = pruning_methods.PruningTool(input_channel=1, pruning_rate=0.1)
 
     if demo_flag == 0:
-        basic_training(demo_net, training_dataset, epochs=1000, save_param=True)
-        utils_mnist.valid_model(demo_net, batch_size=1000)  # 100 Epochs / Acc:87.94 / FLOPs:600064
+        basic_training(demo_net, training_dataset, epochs=100, save_param=True)
+        utils_mnist.valid_model(demo_net, batch_size=1000)  # 100 Epochs / Acc:94.65 / FLOPs:600064
     elif demo_flag == 1:
-        utils_torch.load_param(demo_net, "demo_param.pkl")
+        utils_torch.load_param(demo_net, "demo_param_1.pkl")
         pruning_tool.one_shot_pruning(demo_net)
-        utils_mnist.valid_model(demo_net, batch_size=1000)  # 100 Epochs / Acc:0 / FLOPs:0
+        utils_mnist.valid_model(demo_net, batch_size=1000)  # 100 Epochs / Acc:38.93 / FLOPs:538624
         basic_training(demo_net, training_dataset, 20)
-        utils_mnist.valid_model(demo_net, batch_size=1000)  # 120 Epochs / Acc:0 / FLOPs:0
-    elif demo_flag == 2:
-        utils_torch.load_param(demo_net, "demo_param.pkl")
-        pruning_tool.iterative_pruning(demo_net, training_dataset, nn.CrossEntropyLoss(), epoch_interval=2)
-        utils_mnist.valid_model(demo_net, batch_size=1000)  # 000 Epochs / Acc:0 / FLOPs:0
-    elif demo_flag == 3:
-        utils_torch.load_param(demo_net, "demo_param.pkl")
-        pruning_tool.automatic_pruning(demo_net, training_dataset, nn.CrossEntropyLoss())
-        utils_mnist.valid_model(demo_net, batch_size=1000)  # 000 Epochs / Acc:0 / FLOPs:0
+        utils_mnist.valid_model(demo_net, batch_size=1000)  # 120 Epochs / Acc:93.34 / FLOPs:538624
+    # elif demo_flag == 2:
+    #     utils_torch.load_param(demo_net, "demo_param_1.pkl")
+    #     pruning_tool.iterative_pruning(demo_net, training_dataset, nn.CrossEntropyLoss(), epoch_interval=2)
+    #     utils_mnist.valid_model(demo_net, batch_size=1000)  # 120 Epochs / Acc:0 / FLOPs:0
+    # elif demo_flag == 3:
+    #     utils_torch.load_param(demo_net, "demo_param_1.pkl")
+    #     pruning_tool.automatic_pruning(demo_net, training_dataset, nn.CrossEntropyLoss(), epochs=20)
+    #     utils_mnist.valid_model(demo_net, batch_size=1000)  # 000 Epochs / Acc:0 / FLOPs:0
