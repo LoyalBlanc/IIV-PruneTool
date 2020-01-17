@@ -1,6 +1,5 @@
-import torch
-
 import methods.minimum_weight as mw
+import torch
 import utils.utils_torch as utils_torch
 
 

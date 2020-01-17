@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-import modules.abstract_network as an
-import modules.basic_module as bm
+import old_version.modules.abstract_network as an
+import old_version.modules.basic_module as bm
 
 
 class DemoLayer(an.AbstractNetwork):
@@ -39,9 +39,9 @@ class DemoNetwork(an.AbstractNetwork):
 if __name__ == "__main__":
     import os
     from torch.optim import Adam
-    import methods.abstract_method as pruning_methods
-    import utils.utils_mnist as utils_mnist
-    import utils.utils_torch as utils_torch
+    import old_version.methods.abstract_method as pruning_methods
+    import old_version.utils.utils_mnist as utils_mnist
+    import old_version.utils.utils_torch as utils_torch
 
     torch.manual_seed(229)
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"

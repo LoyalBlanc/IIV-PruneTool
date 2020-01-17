@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 import torch.nn as nn
 
-import utils.utils_torch as utils_torch
+import old_version.utils.utils_torch as utils_torch
 
 
 class LinkNode(object):
