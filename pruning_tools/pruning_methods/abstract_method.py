@@ -5,11 +5,11 @@ from . import utils
 
 
 def get_the_module_name(method):
+    # Todo: More pruning modules will be added in the future.
     if method == "minimum_weight":
         return mw
     else:
-        # Todo: More pruning modules will be added in the future.
-        pass
+        return
 
 
 def train_model_once(model, method, func_train_one_epoch, *training_args):
@@ -66,17 +66,17 @@ def iterative_pruning(network,
         network.cuda()
         flops_now = utils.get_model_flops(network, example_data)
         if pruning_interval < 1:
-            pruning_interval = int(1 / pruning_interval)
+            interval = int(1 / pruning_interval)
             epoch += 1
             step_loss, lr = train_model_once(network, method, func_train_one_epoch, *training_args)
             training_args = (training_args[0], training_args[1], lr)
             print('Epoch {}, Loss: {:.4f}, FLOPs: {}'.format(epoch, step_loss, flops_now))
             network.cpu()
-            for _ in range(pruning_interval):
+            for _ in range(interval):
                 method_module.prune_network_once(network)
         else:
-            pruning_interval = int(pruning_interval)
-            for _ in range(pruning_interval):
+            interval = int(pruning_interval)
+            for _ in range(interval):
                 epoch += 1
                 step_loss, lr = train_model_once(network, method, func_train_one_epoch, *training_args)
                 training_args = (training_args[0], training_args[1], lr)
@@ -99,22 +99,25 @@ def automatic_pruning(network,
     print("Start automatic pruning.")
     method_module = get_the_module_name(method)
     method_module.prepare_pruning(network, example_data)
-    acc_threshold = func_valid(network)
+    acc_threshold = func_valid(network, batch_size=5000, verbose=False)
+    print("Accuracy threshold: %.2f" % acc_threshold)
 
     network_backup = copy.deepcopy(network)
     for epoch in range(epochs):
         network.cuda()
         step_loss, lr = train_model_once(network, method, func_train_one_epoch, *training_args)
         training_args = (training_args[0], training_args[1], lr)
-        acc = func_valid(network, batch_size=5000)
-        print('Epoch [{}/{}], Loss: {:.4f}, Accuracy: {.2f}'.format(epoch + 1, epochs, step_loss, acc))
+        acc = func_valid(network, batch_size=5000, verbose=False)
+        print('Epoch [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}'.format(epoch + 1, epochs, step_loss, acc))
         if acc > acc_threshold:
-            acc_threshold = acc
+            while acc > acc_threshold:
+                acc_threshold = acc
+                network_backup = copy.deepcopy(network)
+                network.cpu()
+                method_module.prune_network_once(network)
+                acc = func_valid(network, batch_size=5000, verbose=False)
             flops_now = utils.get_model_flops(network, example_data)
-            network_backup = copy.deepcopy(network)
             print("Update network backup, FLOPs: %d" % flops_now)
-            network.cpu()
-            method_module.prune_network_once(network)
 
     network_backup.cuda()
     flops_now = utils.get_model_flops(network_backup, example_data)

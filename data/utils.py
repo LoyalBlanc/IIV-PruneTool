@@ -26,7 +26,7 @@ def get_valid_loader(batch_size=1000):
     return valid_loader
 
 
-def valid_model(model, batch_size=1000):
+def valid_model(model, batch_size=1000, verbose=True):
     model.cuda()
     model.eval()
     valid_loader = get_valid_loader(batch_size)
@@ -38,4 +38,7 @@ def valid_model(model, batch_size=1000):
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels.cuda()).sum().item()
-    print("Accuracy:{}".format(100 * correct / total))
+    acc = 100 * correct / total
+    if verbose:
+        print("Accuracy:{}".format(acc))
+    return acc

@@ -40,9 +40,9 @@ if __name__ == "__main__":
     0: preparing for test
     1: one-shot pruning with fine-tuning
     2: iterative pruning
-    3: automatic pruning
+    3: automatic pruning (recommended)
     """
-    demo_flag = 2
+    demo_flag = 3
     demo_model = models.resnet18()
     dummy_data = torch.ones(1, 3, 64, 64)
     pt.analyze_network(demo_model, dummy_data, verbose=False, for_pruning=True)
@@ -59,10 +59,11 @@ if __name__ == "__main__":
     elif demo_flag == 2:
         utils.load_param(demo_model, "data/demo_param_.pkl")
         training_args = (training_dataset, nn.CrossEntropyLoss(), 1e-3)
-        pt.iterative_pruning(demo_model, dummy_data, train_one_epoch, *training_args, pruning_rate=0.2)
-        utils.valid_model(demo_model, batch_size=5000)  # Acc 00.00 / FLOPs 000000
+        pt.iterative_pruning(demo_model, dummy_data, train_one_epoch, *training_args,
+                             pruning_rate=0.2, pruning_interval=0.1)
+        utils.valid_model(demo_model, batch_size=5000)  # Acc 98.81 / FLOPs 455680
     elif demo_flag == 3:
-        utils.load_param(demo_model, "data/demo_param.pkl")
+        utils.load_param(demo_model, "data/demo_param_.pkl")
         training_args = (training_dataset, nn.CrossEntropyLoss(), 1e-3)
-        pt.automatic_pruning(demo_model, dummy_data, utils.valid_model, train_one_epoch, *training_args, epochs=25)
+        pt.automatic_pruning(demo_model, dummy_data, utils.valid_model, train_one_epoch, *training_args, epochs=100)
         utils.valid_model(demo_model, batch_size=5000)  # Acc 00.00 / FLOPs 000000

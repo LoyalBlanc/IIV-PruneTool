@@ -21,6 +21,7 @@ class LinkNode(object):
 
 
 def detect_network(network, input_data):
+    # Todo: Maybe there is a public method to get the trace graph with scopeName.
     graph, _, _ = torch.onnx.utils._model_to_graph(network, input_data, _retain_param_name=True)
 
     node_index_link = {}
@@ -117,4 +118,4 @@ if __name__ == "__main__":
 
     model = models.resnet18().cuda()
     unit_dict = detect_network(model, torch.ones(1, 3, 224, 224).cuda())
-    # print(get_unit_name_dict_info(unit_dict))
+    print(get_unit_name_dict_info(unit_dict))
