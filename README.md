@@ -70,6 +70,7 @@
         network,                    # 需要剪枝的网络 
         example_data,               # 测试网络的示例输入
         func_valid,                 # 迭代使用的验证函数
+        target_accuracy,            # 目标正确率
         func_train_one_epoch,       # 迭代使用的训练函数
         *training_args,             # 迭代使用的训练参数
         method="minimum_weight",    # 剪枝方法
@@ -77,4 +78,11 @@
         ) -> network_backup         # 返回剪枝过程中最低Loss的网络
     ```
     一次成功的剪枝预计输出以下内容：
-    >
+    >   Start automatic pruning.  
+        Pruning Channel 177 in Layer .layer4[0].conv1,  (Score 0.0996)  
+        Update network backup, FLOPs: 584752  
+        Epoch [1/200], Loss: 27.8687, Accuracy: 98.99  
+        Epoch [2/200], Loss: 25.5174, Accuracy: 99.17  
+        Pruning Channel 154 in Layer .layer4[0].conv1,  (Score 0.0511)  
+        ...  
+        Successfully prune the network, the FLOPs now is 343524

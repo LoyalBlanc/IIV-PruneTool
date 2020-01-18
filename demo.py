@@ -33,7 +33,7 @@ def basic_training(network, dataset, epochs, lr=1e-3):
 
 if __name__ == "__main__":
     torch.manual_seed(229)
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
     """
     demo_flag:
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     2: iterative pruning
     3: automatic pruning (recommended)
     """
-    demo_flag = 3
+    demo_flag = 0
     demo_model = models.resnet18()
     dummy_data = torch.ones(1, 3, 64, 64)
     pt.analyze_network(demo_model, dummy_data, verbose=False, for_pruning=True)
@@ -65,5 +65,5 @@ if __name__ == "__main__":
     elif demo_flag == 3:
         utils.load_param(demo_model, "data/demo_param_.pkl")
         training_args = (training_dataset, nn.CrossEntropyLoss(), 1e-3)
-        pt.automatic_pruning(demo_model, dummy_data, utils.valid_model, train_one_epoch, *training_args, epochs=100)
-        utils.valid_model(demo_model, batch_size=5000)  # Acc 00.00 / FLOPs 000000
+        pt.automatic_pruning(demo_model, dummy_data, utils.valid_model, 99, train_one_epoch, *training_args, epochs=200)
+        utils.valid_model(demo_model, batch_size=5000)  # Acc 99.19 / FLOPs 343524

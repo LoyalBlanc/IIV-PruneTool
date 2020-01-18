@@ -91,16 +91,16 @@ def iterative_pruning(network,
 def automatic_pruning(network,
                       example_data,
                       func_valid,
+                      target_accuracy,
                       func_train_one_epoch,
                       *training_args,
                       method="minimum_weight",
-                      epochs=10):
+                      epochs=10, ):
     example_data = example_data.cuda()
     print("Start automatic pruning.")
+    network.cuda()
     method_module = get_the_module_name(method)
     method_module.prepare_pruning(network, example_data)
-    acc_threshold = func_valid(network, batch_size=5000, verbose=False)
-    print("Accuracy threshold: %.2f" % acc_threshold)
 
     network_backup = copy.deepcopy(network)
     for epoch in range(epochs):
@@ -109,13 +109,13 @@ def automatic_pruning(network,
         training_args = (training_args[0], training_args[1], lr)
         acc = func_valid(network, batch_size=5000, verbose=False)
         print('Epoch [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}'.format(epoch + 1, epochs, step_loss, acc))
-        if acc > acc_threshold:
-            while acc > acc_threshold:
-                acc_threshold = acc
+        if acc > target_accuracy:
+            while acc > target_accuracy:
                 network_backup = copy.deepcopy(network)
                 network.cpu()
                 method_module.prune_network_once(network)
                 acc = func_valid(network, batch_size=5000, verbose=False)
+                print(acc)
             flops_now = utils.get_model_flops(network, example_data)
             print("Update network backup, FLOPs: %d" % flops_now)
 
