@@ -109,7 +109,7 @@ def automatic_pruning(network,
         training_args = (training_args[0], training_args[1], lr)
         acc = func_valid(network)
         print('Epoch [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}'.format(epoch + 1, epochs, step_loss, acc))
-        if acc > target_accuracy:  # and epoch > epochs / 10:
+        if acc > target_accuracy:
             while acc > target_accuracy:
                 network_backup = copy.deepcopy(network)
                 network.cpu()

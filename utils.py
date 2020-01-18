@@ -15,14 +15,14 @@ def load_param(model, save_path):
 
 def get_train_loader(batch_size=1000):
     transform = transforms.Compose([transforms.Resize(96), transforms.ToTensor()])
-    train_dataset = torchvision.datasets.MNIST(root='data', train=True, transform=transform, download=True)
+    train_dataset = torchvision.datasets.CIFAR10(root='data', train=True, transform=transform, download=True)
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
     return train_loader
 
 
 def get_valid_loader(batch_size=1000):
     transform = transforms.Compose([transforms.Resize(96), transforms.ToTensor()])
-    valid_dataset = torchvision.datasets.MNIST(root='data', train=False, transform=transform)
+    valid_dataset = torchvision.datasets.CIFAR10(root='data', train=False, transform=transform)
     valid_loader = DataLoader(dataset=valid_dataset, batch_size=batch_size, shuffle=False)
     return valid_loader
 
@@ -31,7 +31,7 @@ def train_one_epoch(model, dataset, criterion, lr):
     optimizer = op.Adam(model.parameters(), lr=lr)
     step_loss = 0
     for index, (images, labels) in enumerate(dataset):
-        images = torch.cat((images, images, images), dim=1)
+        # images = torch.cat((images, images, images), dim=1)
         outputs = model(images.cuda())
         loss = criterion(outputs, labels.cuda()) + 1e-3 * model.regularization
         model.regularization = 0
@@ -50,7 +50,7 @@ def valid_model(model, batch_size=1000, verbose=True):
     correct = 0
     with torch.no_grad():
         for index, (images, labels) in enumerate(valid_loader):
-            images = torch.cat((images, images, images), dim=1)
+            # images = torch.cat((images, images, images), dim=1)
             outputs = model(images.cuda())
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)

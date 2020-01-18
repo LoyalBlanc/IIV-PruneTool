@@ -22,13 +22,18 @@ def basic_validating(network):
 
 if __name__ == "__main__":
     torch.manual_seed(229)
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
     # -------------------------------------------------- #
     # MNIST Test
-    # Pre-train 10 epochs & Automatic pruning 10 epochs
+    # Pre-train 10 epochs & Automatic pruning 100 epochs
     # FLOPS      593920 ->  343524 (Remain 57.84%)
     # Accuracy   0.9921 ->  0.9918
+    # -------------------------------------------------- #
+    # CIFAR10 Test
+    # Pre-train 10 epochs & Automatic pruning 100 epochs
+    # FLOPS      000000 ->  000000 (Remain 00.00%)
+    # Accuracy   0.0000 ->  0.0000
     # -------------------------------------------------- #
     model = models.resnet18(pretrained=True)
 
@@ -42,4 +47,4 @@ if __name__ == "__main__":
 
     # Automatic pruning
     training_args = (training_dataset, nn.CrossEntropyLoss(), 1e-3)
-    pt.automatic_pruning(model, dummy_data, basic_validating, 99, utils.train_one_epoch, *training_args, epochs=10)
+    pt.automatic_pruning(model, dummy_data, basic_validating, 90, utils.train_one_epoch, *training_args, epochs=10000)
