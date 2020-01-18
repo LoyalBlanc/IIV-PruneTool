@@ -21,7 +21,7 @@ def basic_training(network, dataset, epochs, lr=1e-3):
 
 if __name__ == "__main__":
     torch.manual_seed(229)
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
     """
     demo_flag:
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     2: iterative pruning
     3: automatic pruning
     """
-    demo_flag = 1
+    demo_flag = 0
     demo_model = models.resnet18()
     dummy_data = torch.ones(1, 3, 64, 64)
     pt.analyze_network(demo_model, dummy_data, verbose=False, for_pruning=True)
