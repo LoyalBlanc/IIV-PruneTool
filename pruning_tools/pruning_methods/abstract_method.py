@@ -1,7 +1,7 @@
-from . import utils
+import copy
+
 from . import minimum_weight as mw
-import torch
-import torch.optim as op
+from . import utils
 
 
 def get_the_module_name(method):
@@ -12,84 +12,111 @@ def get_the_module_name(method):
         pass
 
 
-def train_model_once(model, dataset, criterion, lr, method):
+def train_model_once(model, method, func_train_one_epoch, *training_args):
     method_module = get_the_module_name(method)
     method_module.before_training(model)
-    model.cuda()
     model.train()
-    optimizer = op.Adam(model.parameters(), lr=lr)
-    step_loss = 0
-    for index, (images, labels) in enumerate(dataset):
-        outputs = model(torch.cat((images, images, images), dim=1).cuda())
-        loss = criterion(outputs, labels.cuda()) + 1e-3 * model.regularization
-        model.regularization = 0
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        step_loss += loss.item()
+    step_loss, lr = func_train_one_epoch(model, *training_args)
     method_module.after_training(model)
-    lr = optimizer.param_groups[0]['lr']
-    model.eval()
-    model.cpu()
     return step_loss, lr
 
 
 def _prepare_pruning(network, example_data, method, pruning_rate):
     network.cuda()
-    network.eval()
     flops_now = utils.get_model_flops(network, example_data)
     flops_target = int(flops_now * (1 - pruning_rate))
     print("FLOPs before pruning is %d, target is %d." % (flops_now, flops_target))
     method_module = get_the_module_name(method)
-    method_module.prepare_pruning(network)
+    method_module.prepare_pruning(network, example_data)
     network.cpu()
-    return flops_target, method_module
+    return flops_now, flops_target, method_module
 
 
-def one_shut_pruning(network, example_data, method, pruning_rate):
+def one_shut_pruning(network,
+                     example_data,
+                     method="minimum_weight",
+                     pruning_rate=0.1):
     example_data = example_data.cuda()
     print("Start one-shot pruning.")
-    flops_target, method_module = _prepare_pruning(network, example_data, method, pruning_rate)
-    flops_now = flops_target + 1
+    flops_now, flops_target, method_module = _prepare_pruning(network, example_data, method, pruning_rate)
 
     while flops_now > flops_target:
         network.cpu()
         method_module.prune_network_once(network)
         network.cuda()
         flops_now = utils.get_model_flops(network, example_data)
-        # from utils.auxiliary_dataset import valid_model
-        # valid_model(network, batch_size=2500)
+
     print("Successfully prune the network, the FLOPs now is %d" % flops_now)
     return network
 
 
-def iterative_pruning(network, dataset, example_data, method, pruning_rate, criterion, lr):
+def iterative_pruning(network,
+                      example_data,
+                      func_train_one_epoch,
+                      *training_args,
+                      method="minimum_weight",
+                      pruning_rate=0.1,
+                      pruning_interval=1):
     example_data = example_data.cuda()
     print("Start iterative pruning.")
-    flops_target, method_module = _prepare_pruning(network, example_data, method, pruning_rate)
-    flops_now = flops_target + 1
+    flops_now, flops_target, method_module = _prepare_pruning(network, example_data, method, pruning_rate)
 
     epoch = 0
     while flops_now > flops_target:
         network.cuda()
         flops_now = utils.get_model_flops(network, example_data)
-        step_loss, lr = train_model_once(network, dataset, criterion, lr, "minimum_weight")
-        epoch += 1
-        print('Epoch {},  Loss: {:.4f}'.format(epoch, step_loss))
-        # from utils.auxiliary_dataset import valid_model
-        # valid_model(network, batch_size=2500)
-        network.cpu()
-        method_module.prune_network_once(network)
+        if pruning_interval < 1:
+            pruning_interval = int(1 / pruning_interval)
+            epoch += 1
+            step_loss, lr = train_model_once(network, method, func_train_one_epoch, *training_args)
+            training_args = (training_args[0], training_args[1], lr)
+            print('Epoch {}, Loss: {:.4f}, FLOPs: {}'.format(epoch, step_loss, flops_now))
+            network.cpu()
+            for _ in range(pruning_interval):
+                method_module.prune_network_once(network)
+        else:
+            pruning_interval = int(pruning_interval)
+            for _ in range(pruning_interval):
+                epoch += 1
+                step_loss, lr = train_model_once(network, method, func_train_one_epoch, *training_args)
+                training_args = (training_args[0], training_args[1], lr)
+                print('Epoch {}, Loss: {:.4f}, FLOPs: {}'.format(epoch, step_loss, flops_now))
+            network.cpu()
+            method_module.prune_network_once(network)
 
     print("Successfully prune the network, the FLOPs now is %d" % flops_now)
     return network
 
 
-def automatic_pruning(network, dataset, example_data, method, pruning_rate, criterion, lr, epochs):
+def automatic_pruning(network,
+                      example_data,
+                      func_valid,
+                      func_train_one_epoch,
+                      *training_args,
+                      method="minimum_weight",
+                      epochs=10):
     example_data = example_data.cuda()
     print("Start automatic pruning.")
-    flops_target, method_module = _prepare_pruning(network, example_data, method, pruning_rate)
-    flops_now = flops_target + 1
-    # Todo: automatic_pruning
+    method_module = get_the_module_name(method)
+    method_module.prepare_pruning(network, example_data)
+    acc_threshold = func_valid(network)
+
+    network_backup = copy.deepcopy(network)
+    for epoch in range(epochs):
+        network.cuda()
+        step_loss, lr = train_model_once(network, method, func_train_one_epoch, *training_args)
+        training_args = (training_args[0], training_args[1], lr)
+        acc = func_valid(network, batch_size=5000)
+        print('Epoch [{}/{}], Loss: {:.4f}, Accuracy: {.2f}'.format(epoch + 1, epochs, step_loss, acc))
+        if acc > acc_threshold:
+            acc_threshold = acc
+            flops_now = utils.get_model_flops(network, example_data)
+            network_backup = copy.deepcopy(network)
+            print("Update network backup, FLOPs: %d" % flops_now)
+            network.cpu()
+            method_module.prune_network_once(network)
+
+    network_backup.cuda()
+    flops_now = utils.get_model_flops(network_backup, example_data)
     print("Successfully prune the network, the FLOPs now is %d" % flops_now)
-    return network
+    return network_backup

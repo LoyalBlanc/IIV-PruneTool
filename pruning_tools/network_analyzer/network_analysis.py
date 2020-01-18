@@ -1,13 +1,14 @@
+import types
+
 import torch
 
-import types
 from pruning_tools.network_analyzer import network_detector
 from .support_modules.__init__ import *
 
 
-def analyze_network(network, input_data, verbose=False, for_pruning=True):
+def analyze_network(network, example_data, verbose=False, for_pruning=True):
     network.cuda()
-    unit_dict = network_detector.detect_network(network, input_data.cuda())
+    unit_dict = network_detector.detect_network(network, example_data.cuda())
     if verbose:
         print(network.__repr__)
         print(network_detector.get_unit_name_dict_info(unit_dict))

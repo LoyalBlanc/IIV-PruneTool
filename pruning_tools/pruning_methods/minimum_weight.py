@@ -1,12 +1,26 @@
+import copy
+
 import torch
 
 
-def prepare_pruning(network):
+def prepare_pruning(network, example_data):
     unit_dict = network.unit_dict
     network.pruning_range = []
     for unit_name in unit_dict.keys():
         if eval("network" + unit_name).is_layer:
             network.pruning_range.append(unit_name)
+
+    # Todo: Here must provide a beautiful method!
+    del_list = []
+    for unit_name in network.pruning_range:
+        network_backup = copy.deepcopy(network)
+        network_backup.prune_spec_channel(unit_name, 0)
+        try:
+            _ = network_backup(example_data)
+        except RuntimeError:
+            del_list.append(unit_name)
+    for unit_name in del_list:
+        network.pruning_range.remove(unit_name)
 
 
 def prune_network_once(network):
@@ -66,11 +80,10 @@ if __name__ == "__main__":
     model = models.resnet18()
     data = torch.ones(1, 3, 224, 224)
     nwa.analyze_network(model, data, verbose=False, for_pruning=True)
-    prepare_pruning(model)
+    prepare_pruning(model, data)
 
     for test_unit_name in model.pruning_range:
-        model_backup = models.resnet18()
-        nwa.analyze_network(model_backup, data, verbose=False, for_pruning=True)
+        model_backup = copy.deepcopy(model)
         model_backup.prune_spec_channel(test_unit_name, 0)
         try:
             _ = model_backup(data)
