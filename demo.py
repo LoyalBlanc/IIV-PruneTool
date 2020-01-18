@@ -5,7 +5,7 @@ import torch.nn as nn
 import torchvision.models as models
 
 import pruning_tools as pt
-from data import utils
+import utils
 
 
 def basic_training(network, dataset, epochs, lr=1e-3):
@@ -24,6 +24,17 @@ if __name__ == "__main__":
     torch.manual_seed(229)
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
+    # -------------------------------------------------- #
+    # MNIST Test
+    # Pre-train 10 epochs & Automatic pruning 200 epochs
+    # FLOPS     593920 -> 343524 (Remain 57.84%)
+    # Accuracy  0.9921 -> 0.9918
+    # -------------------------------------------------- #
+    # CIFAR10 Test
+    # Pre-train 20 epochs & Automatic pruning 100 epochs
+    # FLOPS     000000 -> 000000 (Remain 00.00%)
+    # Accuracy  0.0000 -> 0.0000
+    # -------------------------------------------------- #
     model = models.resnet18()
 
     # Analysis the network
@@ -32,10 +43,9 @@ if __name__ == "__main__":
 
     # Pre-train the model
     training_dataset = utils.get_train_loader(2000)
-    basic_training(model, training_dataset, 100)
+    basic_training(model, training_dataset, 20)
+    utils.save_param(model, "cifar10.pkl")
 
     # Automatic pruning
-    # FLOPS     00000 -> 00000
-    # Accuracy  00.00 -> 00.00
     training_args = (training_dataset, nn.CrossEntropyLoss(), 1e-3)
-    pt.automatic_pruning(model, dummy_data, utils.valid_model, 95, basic_validating, *training_args, epochs=100)
+    pt.automatic_pruning(model, dummy_data, basic_validating, 95, basic_validating, *training_args, epochs=100)
