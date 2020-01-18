@@ -5,6 +5,7 @@
 * E-mail: 1931604@tongji.edu.cn
 
 ## 使用方法
+
 01. 声明调用  
     ```
     import pruning_tools as pt
@@ -32,9 +33,7 @@
     >   Start one-shot pruning.  
         FLOPs before pruning is 593920, target is 475136.  
         Pruning Channel 11 in Layer .conv1, .layer1[1].conv2, .layer1[0].conv2,  (Score 0.2874)  
-        Pruning Channel 42 in Layer .conv1, .layer1[1].conv2, .layer1[0].conv2,  (Score 0.2978)  
         ...  
-        Pruning Channel 29 in Layer .conv1, .layer1[1].conv2, .layer1[0].conv2,  (Score 0.3408)  
         Successfully prune the network, the FLOPs now is 474112
 
 22. 迭代式剪枝  
@@ -56,11 +55,7 @@
         FLOPs before pruning is 593920, target is 475136.  
         Epoch 1, Loss: 1716.7428, FLOPs: 593920  
         Pruning Channel 5 in Layer .conv1, .layer1[1].conv2, .layer1[0].conv2,  (Score 0.1760)  
-        ...  
-        Epoch 4, Loss: 197.6281, FLOPs: 455680  
-        Pruning Channel 493 in Layer .layer4[0].conv1,  (Score 0.0585)  
-        ...  
-        Pruning Channel 140 in Layer .layer4[0].conv1,  (Score 0.0591)  
+        ...    
         Successfully prune the network, the FLOPs now is 455680
         
 23. 自动剪枝(推荐)  
@@ -86,3 +81,11 @@
         Pruning Channel 154 in Layer .layer4[0].conv1,  (Score 0.0511)  
         ...  
         Successfully prune the network, the FLOPs now is 343524
+
+
+*注：可参考demo.py在CIFAR10上对ResNet18进行的自动剪枝*
+
+## 支持的模块(2020.01.18)
+* nn.Conv2d
+* nn.BatchNorm2d
+* 任意不影响剪枝的模块，如各类激活函数

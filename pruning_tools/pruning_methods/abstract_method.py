@@ -107,14 +107,14 @@ def automatic_pruning(network,
         network.cuda()
         step_loss, lr = train_model_once(network, method, func_train_one_epoch, *training_args)
         training_args = (training_args[0], training_args[1], lr)
-        acc = func_valid(network, batch_size=5000, verbose=False)
+        acc = func_valid(network)
         print('Epoch [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}'.format(epoch + 1, epochs, step_loss, acc))
         if acc > target_accuracy:
             while acc > target_accuracy:
                 network_backup = copy.deepcopy(network)
                 network.cpu()
                 method_module.prune_network_once(network)
-                acc = func_valid(network, batch_size=5000, verbose=False)
+                acc = func_valid(network)
                 print(acc)
             flops_now = utils.get_model_flops(network, example_data)
             print("Update network backup, FLOPs: %d" % flops_now)

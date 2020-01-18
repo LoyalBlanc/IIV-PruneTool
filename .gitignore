@@ -1,4 +1,5 @@
 .idea
 *.pyc
 data/MNIST
+data/CIFAR10
 *.pkl
