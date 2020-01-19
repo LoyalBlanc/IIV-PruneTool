@@ -22,7 +22,7 @@ def basic_validating(network):
 
 if __name__ == "__main__":
     torch.manual_seed(229)
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
     # -------------------------------------------------- #
     # MNIST Test
@@ -38,13 +38,13 @@ if __name__ == "__main__":
     model = models.resnet18(pretrained=True)
 
     # Analysis the network
-    dummy_data = torch.ones(1, 3, 96, 96)
+    dummy_data = torch.ones(1, 3, 32, 32)
     pt.analyze_network(model, dummy_data, verbose=False, for_pruning=True)
 
     # Pre-train the model
-    training_dataset = utils.get_train_loader(2000)
+    training_dataset = utils.get_train_loader(1000)
     basic_training(model, training_dataset, 10)
 
     # Automatic pruning
     training_args = (training_dataset, nn.CrossEntropyLoss(), 1e-3)
-    pt.automatic_pruning(model, dummy_data, basic_validating, 90, utils.train_one_epoch, *training_args, epochs=10000)
+    pt.automatic_pruning(model, dummy_data, basic_validating, 99, utils.train_one_epoch, *training_args, epochs=100)

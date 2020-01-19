@@ -115,7 +115,6 @@ def automatic_pruning(network,
                 network.cpu()
                 method_module.prune_network_once(network)
                 acc = func_valid(network)
-                print(acc)
             flops_now = utils.get_model_flops(network, example_data)
             print("Update network backup, FLOPs: %d" % flops_now)
 
